@@ -827,7 +827,18 @@
         let characterData = {};
         let currentId = 'default';
         let saveTimeout = null;
-        const ATTRIBUTES_LIST = ["FOR", "AGI", "RES", "FUR", "INT", "PER", "CAR", "FRV", "CON"];
+        const ATTRIBUTES_DATA = [
+            { key: "FOR", name: "Força" },
+            { key: "AGI", name: "Agilidade" },
+            { key: "RES", name: "Resistência" },
+            { key: "FUR", name: "Furtividade" },
+            { key: "INT", name: "Inteligência" },
+            { key: "PER", name: "Percepção" },
+            { key: "CAR", name: "Carisma" },
+            { key: "FRV", name: "Força de Vontade" },
+            { key: "CON", name: "Controle" }
+        ];
+        const ATTRIBUTES_LIST = ATTRIBUTES_DATA.map(a => a.key);
         
         const PONTO_PARTIDA_BONUS = {
             arden_city: "+1 INT ou Skill: Acesso Científico Corporativo",
@@ -922,12 +933,12 @@
             const isComTraje = $('#trajeToggle').checked;
             const attrSource = isComTraje ? characterData[currentId].atributos.comTraje : characterData[currentId].atributos.semTraje;
 
-            for (const attr of ATTRIBUTES_LIST) {
-                const val = attrSource[attr] || 6;
+            ATTRIBUTES_DATA.forEach(attrData => {
+                const val = attrSource[attrData.key] || 6;
                 const mod = Math.floor((val - 10) / 2);
-                $(`#val_${attr}`).textContent = val;
-                $(`#mod_${attr}`).textContent = `mod ${mod >= 0 ? '+' : ''}${mod}`;
-            }
+                $(`#val_${attrData.key}`).textContent = val;
+                $(`#mod_${attrData.key}`).textContent = `mod ${mod >= 0 ? '+' : ''}${mod}`;
+            });
             updatePointsDistribution();
             recalcAllSkills();
         }
@@ -1092,17 +1103,19 @@
         }
 
         // --- DYNAMIC ELEMENT BUILDERS ---
-        function createAttribute(attr) {
+        function createAttribute(attrData) {
+            const attrKey = attrData.key;
+            const attrName = attrData.name;
             const attrDiv = document.createElement('div');
             attrDiv.classList.add('attr');
-            attrDiv.id = `attr_${attr}`;
+            attrDiv.id = `attr_${attrKey}`;
             attrDiv.innerHTML = `
-                <div class="label">${attr}</div>
-                <div class="val" id="val_${attr}">10</div>
-                <div class="mod" id="mod_${attr}">mod +0</div>
+                <div class="label">${attrName} (${attrKey})</div>
+                <div class="val" id="val_${attrKey}">10</div>
+                <div class="mod" id="mod_${attrKey}">mod +0</div>
                 <div class="controls">
-                    <button class="btn small" data-attr="${attr}" data-dir="-1">−</button>
-                    <button class="btn small" data-attr="${attr}" data-dir="1">+</button>
+                    <button class="btn small" data-attr="${attrKey}" data-dir="-1">−</button>
+                    <button class="btn small" data-attr="${attrKey}" data-dir="1">+</button>
                 </div>`;
             $('#attrGrid').appendChild(attrDiv);
             attrDiv.querySelectorAll('button').forEach(btn => btn.addEventListener('click', handleAttrChange));
@@ -1176,8 +1189,8 @@
             const memberAttributes = { ...defaultAttributes, ...item.attributes };
 
             let attributesHTML = '';
-            ATTRIBUTES_LIST.forEach(attr => {
-                attributesHTML += `<label>${attr}<input type="number" class="team-member-attr-input" data-attr="${attr}" value="${memberAttributes[attr]}"></label>`;
+            ATTRIBUTES_DATA.forEach(attrData => {
+                attributesHTML += `<label>${attrData.key}<input type="number" class="team-member-attr-input" data-attr="${attrData.key}" value="${memberAttributes[attrData.key]}"></label>`;
             });
 
             entryDiv.innerHTML = `
@@ -1920,7 +1933,7 @@
         }
 
         function setupInitialUI() {
-            ATTRIBUTES_LIST.forEach(createAttribute);
+            ATTRIBUTES_DATA.forEach(createAttribute);
             
             LICENCAS.forEach(lic => {
                 const div = document.createElement('div');
