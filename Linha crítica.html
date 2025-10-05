@@ -1,0 +1,1991 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ficha de Personagem - Linha Crítica</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Audiowide&family=Poppins:wght@700;900&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0D1117;
+            --card: #161B22;
+            --text: #E6EDF3;
+            --muted: #8B949E;
+            --border: #30363D;
+            --accent-cyan: #33B3CC;
+            --accent-magenta: #C74BDB;
+            --danger: #F85149;
+            --ok: #238636;
+            --warn: #D29922;
+
+            --font-title: 'Poppins', sans-serif;
+            --font-body: 'Roboto', sans-serif;
+            --font-brand: 'Audiowide', sans-serif;
+        }
+
+        [data-theme="light"] {
+            --bg: #F0F2F5;
+            --card: #FFFFFF;
+            --text: #24292E;
+            --muted: #57606A;
+            --border: #D1D5DA;
+            --accent-cyan: #1E90FF;
+            --accent-magenta: #9932CC;
+            --danger: #D73A49;
+            --ok: #1A7F37;
+            --warn: #B08820;
+        }
+
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font-body);
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        .app {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 16px 16px 120px;
+        }
+
+        header.top {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: color-mix(in srgb, var(--bg) 80%, transparent);
+            backdrop-filter: blur(8px);
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+        .grow { flex: 1; }
+        .brand { 
+            font-family: var(--font-brand); 
+            font-weight: 400; 
+            font-size: 1.4rem;
+            letter-spacing: 1px;
+        }
+        .muted { color: var(--muted); }
+
+        button, .btn {
+            font-family: var(--font-body);
+            font-weight: 700;
+            border: 1px solid var(--border);
+            background-color: var(--card);
+            color: var(--text);
+            padding: 8px 14px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        button:hover, .btn:hover {
+            border-color: var(--accent-cyan);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .btn.primary { background: linear-gradient(135deg, var(--accent-magenta), var(--accent-cyan)); color: #FFF; border-color: transparent; }
+        .btn.destructive { background: var(--danger); color: #FFF; border-color: transparent; }
+        .btn.small { padding: 6px 10px; border-radius: 8px; font-size: 0.9rem; }
+
+        input, select, textarea {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font-body);
+            font-size: 1rem;
+        }
+        textarea { min-height: 100px; resize: vertical; }
+
+        .grid { display: grid; gap: 16px; }
+        .grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
+        .grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+        .grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+        }
+        
+        .section-title {
+            font-family: var(--font-title);
+            font-weight: 700;
+            margin: 0 0 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 2px solid var(--accent-cyan);
+            padding-bottom: 8px;
+        }
+
+        .tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+        .tab { padding: 10px 16px; border-radius: 8px; cursor: pointer; border: 1px solid var(--border); background: var(--card); color: var(--text); font-weight: 500;}
+        .tab.active { border-color: var(--accent-cyan); box-shadow: 0 0 10px color-mix(in srgb, var(--accent-cyan) 30%, transparent); }
+
+        .panes { margin-top: 16px; }
+        .pane { display: none; }
+        .pane.active { display: block; }
+        
+        .attr-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+        .attr { background: var(--bg); border: 1px solid var(--border); padding: 12px; border-radius: 12px; text-align: center; }
+        .attr .label { font-weight: 700; font-size: 1rem; margin-bottom: 6px; }
+        .attr .val { font-family: var(--font-title); font-size: 2.2rem; font-weight: 900; line-height: 1; color: var(--accent-cyan); }
+        .attr .mod { font-size: 1rem; font-weight: 700; color: var(--muted); }
+        .attr .controls { display: flex; gap: 6px; justify-content: center; margin-top: 10px; }
+
+        .kpi { flex: 1; min-width: 200px; background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 12px; }
+        .kpi .label { font-size: .9rem; color: var(--muted); }
+        .kpi .value { font-weight: 700; font-size: 1.5rem; }
+        .kpi .row { gap: 8px; }
+        .bar { height: 8px; border-radius: 999px; background: color-mix(in srgb, var(--text) 10%, transparent); overflow: hidden; border: 1px solid var(--border); margin-top: 8px;}
+        .bar > div { height: 100%; background: linear-gradient(90deg, var(--accent-magenta), var(--accent-cyan)); width: 0%; transition: width 0.3s ease; }
+        
+        .table { width: 100%; border-collapse: collapse; }
+        .table th, .table td { border-bottom: 1px dashed var(--border); padding: 10px 8px; text-align: left; }
+        .table th { font-size: .9rem; color: var(--muted); font-weight: 700; }
+
+        .entry {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+        .entry .entry-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .entry .entry-header h4 { margin: 0; font-family: var(--font-body); font-weight: 700; flex-grow: 1; }
+        .entry-content { margin-top: 12px; display: none; grid-template-columns: 1fr; gap: 12px; }
+        .entry-content.open { display: grid; }
+        
+        .toggle-switch { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+        .toggle-switch .switch { position: relative; display: inline-block; width: 60px; height: 34px; }
+        .toggle-switch .switch input { opacity: 0; width: 0; height: 0; }
+        .toggle-switch .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--border); transition: .4s; border-radius: 34px; }
+        .toggle-switch .slider:before { position: absolute; content: ""; height: 26px; width: 26px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+        .toggle-switch input:checked + .slider { background-color: var(--accent-cyan); }
+        .toggle-switch input:checked + .slider:before { transform: translateX(26px); }
+
+        input[type="range"] { -webkit-appearance: none; appearance: none; width: 100%; height: 8px; background: var(--border); outline: none; border-radius: 4px; cursor: pointer; }
+        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 20px; height: 20px; background: var(--accent-cyan); cursor: pointer; border-radius: 50%; border: 2px solid var(--card); }
+        input[type="range"]::-moz-range-thumb { width: 20px; height: 20px; background: var(--accent-cyan); cursor: pointer; border-radius: 50%; border: 2px solid var(--card); }
+
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index: 20; display: none; justify-content: center; align-items: center; }
+        .modal-content { background: var(--card); padding: 24px; border-radius: 16px; border: 1px solid var(--border); max-width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,.2); text-align: center; }
+        .modal-buttons { display: flex; justify-content: center; gap: 10px; margin-top: 20px; }
+
+        #autosave-indicator { display: inline-block; width: 8px; height: 8px; background-color: var(--danger); border-radius: 50%; margin-right: 8px; transition: background-color 0.3s ease; }
+        #autosave-indicator.saved { background-color: var(--ok); }
+        
+        .hidden { display: none !important; }
+
+        .institution-entry {
+            display: grid;
+            grid-template-columns: 1fr auto auto;
+            gap: 10px;
+            align-items: center;
+        }
+        .institution-note {
+            grid-column: 1 / -1;
+            margin-top: 8px;
+        }
+        
+        .license-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .license-item input {
+            width: auto;
+        }
+
+        .condition-list {
+            margin-top: 10px;
+        }
+        .condition-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--bg);
+            padding: 8px;
+            border-radius: 8px;
+            margin-bottom: 6px;
+        }
+        
+        .skill-reference-list {
+            margin-top: 16px;
+        }
+        .skill-reference-list h5 {
+            margin-bottom: 4px;
+            color: var(--accent-cyan);
+        }
+        .skill-reference-list ul {
+            padding-left: 20px;
+            margin: 0;
+            list-style-type: square;
+        }
+
+        @media (max-width: 980px) {
+            .grid.cols-2, .grid.cols-3, .grid.cols-4 { grid-template-columns: 1fr; }
+            .attr-grid { grid-template-columns: repeat(2, 1fr); }
+            .tabs { justify-content: center; }
+        }
+
+        @media print {
+            body { background: #fff; color: #000; font-family: 'Times New Roman', Times, serif; }
+            :root {
+                --bg: #fff; --card: #fff; --text: #000; --muted: #555; --border: #ccc;
+                --accent-cyan: #000; --accent-magenta: #000;
+            }
+            .app { padding: 0; }
+            header.top, .btn, .controls, .toggle-switch, .modal-overlay, .entry-header button { display: none !important; }
+            .card { box-shadow: none; border: 1px solid #ccc; page-break-inside: avoid; }
+            .pane, .entry-content { display: block !important; }
+            .grid { grid-template-columns: 1fr !important; }
+            input, select, textarea { border: 1px dashed #999; background: #f9f9f9; color: #000; }
+            .section-title { border-color: #000; }
+            .bar { border-color: #000; background: #eee; }
+            .bar > div { background: #000; }
+            @page { margin: 1.5cm; }
+        }
+    </style>
+</head>
+<body data-theme="dark">
+
+    <!-- Modals -->
+    <div class="modal-overlay" id="message-modal">
+      <div class="modal-content">
+        <p id="message-text"></p>
+        <div class="modal-buttons"><button class="btn primary" id="message-ok">OK</button></div>
+      </div>
+    </div>
+  
+    <!-- Header -->
+    <header class="top">
+        <div class="row">
+            <div class="brand">LINHA CRÍTICA</div>
+            <div class="grow"></div>
+            <select id="characterSelect" class="btn small"></select>
+            <button class="btn small" id="newCharBtn">Novo</button>
+            <button class="btn small" id="dupCharBtn">Duplicar</button>
+            <button class="btn small destructive" id="delCharBtn">Excluir</button>
+            <button class="btn small" id="exportBtn">Exportar</button>
+            <label class="btn small" for="importFile">Importar</label>
+            <input id="importFile" type="file" accept="application/json" class="hidden">
+            <button class="btn small" id="printBtn">Imprimir</button>
+            <button class="btn small" id="themeBtn">Tema</button>
+        </div>
+        <div class="tabs" id="tabs">
+            <button class="tab active" data-open="0">Home</button>
+            <button class="tab" data-open="1">Identidade & Atributos</button>
+            <button class="tab" data-open="2">Poderes & Skills</button>
+            <button class="tab" data-open="3">Combate & Equipamentos</button>
+            <button class="tab" data-open="4">Relações & Reputação</button>
+            <button class="tab" data-open="5">História & Notas</button>
+            <button class="tab" data-open="6">Equipes</button>
+            <button class="tab" data-open="7">Aventuras</button>
+        </div>
+    </header>
+
+    <!-- Main App -->
+    <div class="app">
+        <div class="panes">
+
+            <!-- Pane 0: Home -->
+            <section class="pane active" data-pane="0">
+                <div class="card">
+                    <h3 class="section-title">📜 A História de Linha Crítica</h3>
+                    <p>Não se sabe ao certo quando o primeiro alienígena apareceu na terra, mas com certeza a humanidade não estava pronta para lidar com isso. Antes mesmo que se soubesse ou notasse, eles já estavam vivendo entre nós. Um verdadeiro golpe surpresa para um planeta que achava que ia descobrir a vida afora primeiro. Mal sabiam que eles já tinham sido descobertos bem antes; mas não pareciam o destino ideal para se viver no cosmos. Mas, com a eclosão e destruição de alguns planetas e a procura de Axxion por conquistar algumas colônias à força, o destino não era escolhido pelas condições, mas sim pelas necessidades. Foi então que se descobriu que a terra poderia ser um ótimo lugar para se viver.</p>
+                    <p>Alienígenas passaram a habitar entre os humanos, mas os humanos não estavam prontos para essa convivência; ainda mais quando os alienígenas começaram a apresentar habilidades sobre humanas. Os humanos estavam começando a ficar para trás e se sentiram ameaçados por isso. Tudo piorou quando novas ameaças começaram a aparecer, colocando tanto humanos quanto alienígenas em perigo. Alguns alienígenas entraram em ação, saindo de seus disfarces e se colocando em risco para proteger não só os das suas espécies, mas também humanos e o lugar a qual passaram a começar a chamar de lar. Foi assim que surgiram os primeiros heróis.</p>
+                    <p>Mas novas ameaças, exigiram novos avanços. Foi quando cientistas em Arden City começaram o projeto "Meta-Humanos", com o objetivo de dar aos humanos habilidades tão magníficas quanto as dos alienígenas. Mas, por um erro de registro, o sangue designado para a análise desses indivíduos acabou se espalhando para os hospitais da cidade. Não se sabe ao certo o número de pessoas que foram infectadas pela falha, só se sabe que foi um número grande (Evento conhecido como: A Contaminação). Nem todos estavam prontos para lidarem com super-poderes e o número se tornou grande demais para que o governo conseguisse assistir ou controlar a todos. O tempo passou e esses meta humanos tiveram filhos, e os filhos também nasciam com o gene. Além disso, alguns se aproveitaram do acidente para roubar sangue meta humano para conduzir seus próprios experimentos. Assim, virar meta humano não se tornou apenas uma questão de ter ou não ter o gene.</p>
+                    <p>Alguns humanos, depois de verem tantas pessoas com habilidades especiais, não quiseram ficar para trás (ou por pura ganância e como forma de superioridade, ou buscando fazer a diferença). Foi então que começaram a recorrer à tecnologia, à ciência e a treinar seu próprio corpo para adquirir habilidades especiais.</p>
+                    <p>Mas os avanços não criaram apenas novas formas de combater as novas ameaças, também criaram outras novas ameaças.</p>
+                    <p>Isso torna uma coisa e apenas uma coisa certa:</p>
+                    <p style="font-weight: bold; text-align: center; font-size: 1.1rem; color: var(--accent-cyan);">A terra precisa de heróis.</p>
+                    <p style="text-align: center;">Você está disposto a ser um deles?</p>
+                    <p style="text-align: center;">Ou você mesmo se tornará parte da ameaça?</p>
+                </div>
+            </section>
+
+            <!-- Pane 1: Identidade & Atributos -->
+            <section class="pane" data-pane="1">
+                <div class="grid cols-3">
+                    <div class="card" style="grid-column: span 2;">
+                        <h3 class="section-title">🪪 Identidade Essencial</h3>
+                        <div class="grid cols-3">
+                            <div><label>Nome do Jogador<input id="nomeJogador"></label></div>
+                            <div><label>Nome Real<input id="nomeReal"></label></div>
+                            <div><label>Nome de Herói/Vilão<input id="nomeHeroi"></label></div>
+                            <div>
+                                <label>Espécie</label>
+                                <select id="especie">
+                                    <option value="humano">Humano</option>
+                                    <option value="meta-humano">Meta-Humano</option>
+                                    <option value="alienigena">Alienígena</option>
+                                </select>
+                            </div>
+                             <div class="hidden" id="origemPoderContainer">
+                                <label>Origem do Poder (Meta-Humano)</label>
+                                <select id="origemPoder">
+                                    <option value="gene">Gene</option>
+                                    <option value="experimento">Experimento</option>
+                                    <option value="acidente">Acidente</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label>Conduta</label>
+                                <select id="conduta">
+                                    <option value="heroi">Herói</option>
+                                    <option value="vigilante">Vigilante</option>
+                                    <option value="anti-heroi">Anti-Herói</option>
+                                    <option value="vilao">Vilão</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label>Ponto de Partida</label>
+                                <select id="pontoPartida">
+                                    <option value="arden_city">Arden City</option>
+                                    <option value="bay_city">Bay City</option>
+                                    <option value="drakovia">Drakovia</option>
+                                    <option value="tirevia">Tirevia</option>
+                                    <option value="vallora">Vallora</option>
+                                    <option value="axxion">Axxion</option>
+                                    <option value="quantaris">Quantaris</option>
+                                </select>
+                            </div>
+                            <div><label>Nível<input id="nivel" type="number" min="1" value="1"></label></div>
+                            <div><label>Experiência (XP)<input id="xp" type="number" min="0" value="0"></label></div>
+                        </div>
+                         <div class="muted" id="pontoPartidaBonus" style="font-size: 0.9rem; margin-top: 12px;"></div>
+                        <div id="autosave" style="opacity: 0.6; display: flex; align-items: center; margin-top: 10px;"><span id="autosave-indicator"></span><span id="autosave-text"></span></div>
+                    </div>
+                    <div class="card">
+                        <h3 class="section-title">⚙️ Distribuição</h3>
+                        <div class="row">
+                            <div>Pontos restantes:</div>
+                            <div style="font-size: 1.5rem; font-weight: 700;"><span id="pontosRestantes" style="color: var(--accent-cyan);">10</span></div>
+                        </div>
+                        <div id="fraquezaWarning" class="hidden" style="color: var(--warn); margin-top: 10px;">Atenção: A regra de fraqueza está ativa (pelo menos 1 atributo ≤ 6).</div>
+                        <details style="margin-top: 12px;">
+                            <summary>Configurar Regras</summary>
+                            <div class="grid cols-2" style="margin-top: 8px;">
+                                <div><label>Pontos Iniciais<input type="number" id="cfg_pts" value="10"></label></div>
+                                <div><label>Bônus (2 Atributos = 6)<input type="number" id="cfg_bonus" value="2"></label></div>
+                                <div>
+                                    <label>Forçar Fraqueza?</label>
+                                    <select id="cfg_forcar_fraqueza">
+                                        <option value="true">Sim</option>
+                                        <option value="false">Não</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </details>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-top:16px;">
+                    <div class="row">
+                        <h3 class="section-title">📊 Atributos</h3>
+                        <div class="grow"></div>
+                        <label class="toggle-switch">
+                            <span>Sem Traje</span>
+                            <div class="switch">
+                                <input type="checkbox" id="trajeToggle">
+                                <span class="slider"></span>
+                            </div>
+                            <span>Com Traje</span>
+                        </label>
+                    </div>
+                    <div class="attr-grid" id="attrGrid">
+                        <!-- Atributos serão gerados por JS -->
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Pane 2: Poderes & Skills -->
+            <section class="pane" data-pane="2">
+                <div class="grid cols-2">
+                    <div class="card">
+                        <h3 class="section-title">💥 Poderes</h3>
+                        <div id="poderesList"></div>
+                        <button class="btn small" id="addPoderBtn">➕ Adicionar Poder</button>
+                    </div>
+                     <div class="card">
+                        <h3 class="section-title">🔪 Skills</h3>
+                        <div class="row" style="margin-bottom: 12px;">
+                           <span class="muted" style="font-size: 0.9rem;">Treinada: +2 / Especialista: +4</span>
+                           <div class="grow"></div>
+                            <button class="btn small" id="addSkillBtn">➕ Nova Skill</button>
+                        </div>
+                        <table class="table" id="skillsTable">
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Atributo</th>
+                                    <th>T</th>
+                                    <th>E</th>
+                                    <th>Extra</th>
+                                    <th>Total</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="skillsBody"></tbody>
+                        </table>
+                        <details class="skill-reference-list" style="margin-top: 16px;">
+                            <summary>Lista de Skills de Referência</summary>
+                            <div class="grid cols-3" style="margin-top: 8px; font-size: 0.9rem;">
+                                <div><h5>Força (FOR)</h5><ul><li>Atletismo</li><li>Briga</li><li>Intimidação Física</li></ul></div>
+                                <div><h5>Agilidade (AGI)</h5><ul><li>Acrobacia</li><li>Reflexos</li><li>Pontaria</li><li>Esquiva</li></ul></div>
+                                <div><h5>Resistência (RES)</h5><ul><li>Vigor</li><li>Tolerância à Dor</li><li>Recuperação</li></ul></div>
+                                <div><h5>Furtividade (FUR)</h5><ul><li>Esconder-se</li><li>Furtar/Arrombar</li><li>Camuflagem</li></ul></div>
+                                <div><h5>Inteligência (INT)</h5><ul><li>Ciência</li><li>Engenharia/Tecnologia</li><li>Investigação</li><li>Estratégia</li></ul></div>
+                                <div><h5>Percepção (PER)</h5><ul><li>Percepção Ambiental</li><li>Intuição</li><li>Rastreamento</li></ul></div>
+                                <div><h5>Carisma (CAR)</h5><ul><li>Diplomacia</li><li>Sociabilidade</li><li>Liderança</li></ul></div>
+                                <div><h5>Força de Vontade (FRV)</h5><ul><li>Resistência Mental</li><li>Foco</li><li>Coragem</li></ul></div>
+                                <div><h5>Controle (CON)</h5><ul><li>Controle de Energia</li><li>Precisão</li><li>Estabilidade</li></ul></div>
+                            </div>
+                        </details>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Pane 3: Combate & Equipamentos -->
+            <section class="pane" data-pane="3">
+                <div class="grid cols-3">
+                    <div class="kpi">
+                        <div class="label">Pontos de Vida (HP)</div>
+                        <div class="value"><span id="current_hp_display">0</span> / <span id="max_hp_display">0</span></div>
+                        <div class="bar"><div id="bar_hp"></div></div>
+                        <div class="row" style="margin-top: 8px;">
+                            <label>Atual<input type="number" id="input_hp_current"></label>
+                            <label>Máx<input type="number" id="input_hp_max"></label>
+                        </div>
+                    </div>
+                    <div class="kpi">
+                        <div class="label">Pontos de Poder (PP)</div>
+                        <div class="value"><span id="current_pp_display">0</span> / <span id="max_pp_display">0</span></div>
+                        <div class="bar"><div id="bar_pp"></div></div>
+                         <div class="row" style="margin-top: 8px;">
+                            <label>Atual<input type="number" id="input_pp_current"></label>
+                            <label>Máx<input type="number" id="input_pp_max"></label>
+                        </div>
+                    </div>
+                    <div class="kpi">
+                        <div class="label">Blindagem (BLD)</div>
+                        <div class="value"><span id="current_bld_display">0</span> / <span id="max_bld_display">0</span></div>
+                        <div class="bar"><div id="bar_bld"></div></div>
+                         <div class="row" style="margin-top: 8px;">
+                            <label>Atual<input type="number" id="input_bld_current"></label>
+                            <label>Máx<input type="number" id="input_bld_max"></label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-top: 16px;">
+                    <h3 class="section-title">⚔️ Condições</h3>
+                    <div class="grid cols-2">
+                        <div>
+                            <label>Condição Mental</label>
+                            <select id="mentalConditionSelect">
+                                <option>Normal</option>
+                                <option>Traumatizado</option>
+                                <option>Corrompido</option>
+                                <option>Dominado</option>
+                                <option>Pânico</option>
+                                <option>Culpa Pesada</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>Condição de Combate</label>
+                            <div class="row">
+                                <select id="combatConditionSelect" class="grow">
+                                    <option>Normal</option>
+                                    <optgroup label="Negativas">
+                                        <option>Atordoado</option>
+                                        <option>Exausto</option>
+                                        <option>Ferido Gravemente</option>
+                                        <option>Sangrando</option>
+                                        <option>Queimado</option>
+                                        <option>Congelado</option>
+                                        <option>Atordoamento Elétrico</option>
+                                        <option>Confuso</option>
+                                        <option>Assustado</option>
+                                        <option>Enfraquecido</option>
+                                        <option>Desarmado</option>
+                                        <option>Cego (temporário)</option>
+                                    </optgroup>
+                                    <optgroup label="Positivas">
+                                        <option>Inspirado (PA)</option>
+                                        <option>Protegido</option>
+                                        <option>Adrenalizado</option>
+                                        <option>Fortificado</option>
+                                        <option>Concentrado</option>
+                                        <option>Regenerando</option>
+                                        <option>Blindagem Ativa</option>
+                                    </optgroup>
+                                    <optgroup label="Situacionais">
+                                        <option>Submerso</option>
+                                        <option>Sem Gravidade</option>
+                                        <option>Área Tóxica</option>
+                                        <option>Sob Fogo Cruzado</option>
+                                        <option>Sob Cobertura</option>
+                                    </optgroup>
+                                </select>
+                                <button id="addCombatConditionBtn" class="btn small">➕</button>
+                            </div>
+                            <div id="activeCombatConditions" class="condition-list"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid cols-2" style="margin-top: 16px;">
+                    <div class="card">
+                        <h3 class="section-title">🥋 O Traje</h3>
+                        <label>Aparência, Cores, Material <textarea id="trajeDesc"></textarea></label>
+                        <div class="row" style="margin-top: 12px;">
+                            <label>Pontos de Traje (PT): <input type="number" id="trajePts" value="0" min="0"></label>
+                        </div>
+                         <label style="margin-top: 12px; display:block;">Fraqueza do Traje <input id="trajeFraqueza"></label>
+                        <h4 style="margin-top: 16px;">Melhorias</h4>
+                        <div id="trajeUpgradesList"></div>
+                        <button class="btn small" id="addTrajeUpgradeBtn">➕ Adicionar Melhoria</button>
+                    </div>
+                    <div class="card">
+                        <h3 class="section-title">🎒 Inventário</h3>
+                        <div class="row muted" style="margin-bottom: 12px;">
+                            <span>Capacidade: <b id="slotsMax">0</b> slots</span>
+                            <div class="grow"></div>
+                            <span>Ocupados: <b id="slotsCurrent">0</b> slots</span>
+                        </div>
+                        <div id="inventoryList"></div>
+                        <button class="btn small" id="addInventoryItemBtn">➕ Adicionar Item</button>
+                        <hr style="border-color: var(--border); margin: 16px 0;">
+                        <label>Créditos (Dinheiro) <input type="number" id="creditos" min="0" value="1000"></label>
+                        <h4 style="margin-top: 16px;">Posses</h4>
+                        <div id="possesList"></div>
+                        <button class="btn small" id="addPosseBtn">➕ Adicionar Posse</button>
+                         <h4 style="margin-top: 16px;">Licenças</h4>
+                         <div id="licencasList" class="grid cols-2"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Pane 4: Relações & Reputação -->
+            <section class="pane" data-pane="4">
+                <div class="grid cols-2">
+                    <div class="card">
+                        <h3 class="section-title">🌍 Opinião Pública</h3>
+                        <label class="toggle-switch">
+                            <span>Identidade Pública</span>
+                             <div class="switch">
+                                <input type="checkbox" id="identidadeSecretaToggle">
+                                <span class="slider"></span>
+                            </div>
+                            <span>Identidade Secreta</span>
+                        </label>
+
+                        <div id="sigiloContainer" class="hidden" style="margin-top: 16px;">
+                            <label>Índice de Sigilo (IS): <b id="sigiloValue">20</b>/20</label>
+                            <input type="range" id="sigiloSlider" min="0" max="20" value="20">
+                        </div>
+
+                        <div style="margin-top: 16px;">
+                            <label>Pontos de Opinião Pública (POP): <b id="popValue">70</b></label>
+                            <input type="range" id="popSlider" min="0" max="220" value="70">
+                            <div style="margin-top: 8px; font-weight: 700; font-size: 1.1rem;">Reputação: <span id="reputacaoNivel" style="color: var(--accent-cyan);">Neutro</span></div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3 class="section-title">🏛️ Relações com Instituições</h3>
+                        <div id="instituicoesList" class="grid"></div>
+                    </div>
+                </div>
+                <div class="grid cols-2" style="margin-top: 16px;">
+                    <div class="card">
+                        <h3 class="section-title">🧠 Estabilidade Mental (EM)</h3>
+                        <div class="kpi">
+                            <div class="label">EM (FRV Sem Traje x 5)</div>
+                            <div class="value"><span id="em_current_display">0</span> / <span id="em_max_display">0</span></div>
+                            <div class="bar"><div id="bar_em"></div></div>
+                            <div class="row" style="margin-top: 8px;">
+                                <label>Atual<input type="number" id="input_em_current"></label>
+                                <label>Máx<input type="number" id="input_em_max"></label>
+                            </div>
+                        </div>
+                        <div style="margin-top: 8px; font-weight: 700; font-size: 1.1rem;">Estado Mental: <span id="em_status" style="color: var(--accent-cyan);">Estável</span></div>
+                    </div>
+                    <div class="card">
+                        <h3 class="section-title">🩸 Corrupção Moral</h3>
+                        <label>Nível de Corrupção: <b id="corrupcao_value">0/20</b></label>
+                        <input type="range" id="corrupcao_slider" min="0" max="20" value="0">
+                        <div class="muted" id="corrupcao_efeitos" style="font-size: 0.9rem; margin-top: 8px;">Efeitos: Nenhum.</div>
+                    </div>
+                </div>
+                <div class="card" style="margin-top: 16px;">
+                    <h3 class="section-title">📍 Relações com Regiões</h3>
+                    <div id="regioesList" class="grid"></div>
+                </div>
+                 <div class="grid cols-2" style="margin-top: 16px;">
+                    <div class="card">
+                        <h3 class="section-title">🤝 Relacionamentos</h3>
+                        <div id="relacionamentosList"></div>
+                        <button class="btn small" id="addRelacionamentoBtn">➕ Adicionar Relacionamento</button>
+                    </div>
+                    <div class="card">
+                        <h3 class="section-title">⚔️ Rivais</h3>
+                        <div id="rivaisList"></div>
+                        <button class="btn small" id="addRivalBtn">➕ Adicionar Rival</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Pane 5: História & Notas -->
+            <section class="pane" data-pane="5">
+                <div class="grid cols-2">
+                    <div class="card">
+                        <h3 class="section-title">📜 Perfil do Personagem</h3>
+                        <label>Aparência Física<textarea id="historia_aparencia"></textarea></label>
+                        <label style="margin-top:12px">Características Emocionais/Psicológicas<textarea id="historia_psicologico"></textarea></label>
+                        <label style="margin-top:12px">História de Origem<textarea id="historia_origem"></textarea></label>
+                        <label style="margin-top:12px">Motivações e Votos<textarea id="historia_motivacoes"></textarea></label>
+                    </div>
+                    <div class="card">
+                        <h3 class="section-title">🧠 Memórias e Eventos Marcantes</h3>
+                        <div id="memoriasList"></div>
+                        <button class="btn small" id="addMemoriaBtn">➕ Adicionar Memória</button>
+                        <hr style="border-color: var(--border); margin: 16px 0;">
+                        <h3 class="section-title">📝 Notas Gerais</h3>
+                        <textarea id="notas" style="min-height: 200px;"></textarea>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Pane 6: Equipes -->
+            <section class="pane" data-pane="6">
+                <div class="grid cols-3">
+                    <div class="card">
+                        <h3 class="section-title">🚀 Informações da Equipe</h3>
+                        <label>Nome da Equipe<input id="team_name"></label>
+                        <div class="row" style="margin-top: 12px;">
+                           <label>Créditos<input type="number" id="team_creditos" value="0"></label>
+                           <label>PEE<input type="number" id="team_pee" value="0"></label>
+                        </div>
+                        <div style="margin-top: 12px;">
+                            <label>Nível da Equipe</label>
+                            <select id="team_level_select"></select>
+                        </div>
+                    </div>
+                    <div class="card" style="grid-column: span 2;">
+                        <h3 class="section-title">🌍 Opinião Pública da Equipe</h3>
+                        <label>Pontos de Opinião Pública (POP): <b id="team_popValue">70</b></label>
+                        <input type="range" id="team_popSlider" min="0" max="220" value="70">
+                        <div style="margin-top: 8px; font-weight: 700; font-size: 1.1rem;">Reputação: <span id="team_reputacaoNivel" style="color: var(--accent-cyan);">Neutra</span></div>
+                    </div>
+                </div>
+                <div class="grid cols-2" style="margin-top: 16px;">
+                    <div class="card">
+                        <h3 class="section-title">👥 Membros da Equipe</h3>
+                        <div id="equipeMembrosList"></div>
+                        <button class="btn small" id="addEquipeMemberBtn">➕ Adicionar Membro</button>
+                    </div>
+                    <div class="card">
+                        <h3 class="section-title">🛡️ Ajudantes & Aliados</h3>
+                        <div id="equipeAjudantesList"></div>
+                        <button class="btn small" id="addEquipeAjudanteBtn">➕ Adicionar Ajudante</button>
+                    </div>
+                </div>
+                <div class="grid cols-2" style="margin-top: 16px;">
+                    <div class="card">
+                        <h3 class="section-title">🏠 Posses da Equipe</h3>
+                         <div id="equipePossesList"></div>
+                        <button class="btn small" id="addEquipePosseBtn">➕ Adicionar Posse</button>
+                    </div>
+                    <div class="card">
+                        <h3 class="section-title">🏛️ Relações da Equipe com Instituições</h3>
+                        <div id="equipeInstituicoesList" class="grid"></div>
+                    </div>
+                </div>
+                <div class="card" style="margin-top: 16px;">
+                    <h3 class="section-title">📍 Relações da Equipe com Regiões</h3>
+                    <div id="equipeRegioesList" class="grid"></div>
+                </div>
+            </section>
+            
+            <!-- Pane 7: Aventuras -->
+            <section class="pane" data-pane="7">
+                <div class="card">
+                    <h3 class="section-title">📖 Registro de Aventuras</h3>
+                    <p class="muted">Use esta seção para registrar o progresso e as memórias de cada sessão de jogo.</p>
+                    
+                    <div id="new-aventura-form" class="entry hidden">
+                        <div class="entry-content open">
+                            <label>Nome da Aventura<input type="text" id="new-aventura-nome"></label>
+                            <label>Data da Sessão<input type="date" id="new-aventura-data"></label>
+                            <label>Resumo da Sessão<textarea id="new-aventura-resumo" placeholder="O que aconteceu nesta sessão?"></textarea></label>
+                            <label>Contribuição do Personagem<textarea id="new-aventura-contrib-char" placeholder="O que seu personagem fez para influenciar a história?"></textarea></label>
+                            <label>Evolução do Personagem<textarea id="new-aventura-contrib-hist" placeholder="O que a história contribuiu para o seu personagem (aprendizados, traumas, etc.)?"></textarea></label>
+                            <div class="row" style="margin-top: 12px; justify-content: flex-end;">
+                                <button class="btn destructive" id="cancelNewAventuraBtn">Cancelar</button>
+                                <button class="btn primary" id="saveNewAventuraBtn">Salvar Registro</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="aventurasList">
+                        <!-- Entradas de aventuras aqui -->
+                    </div>
+
+                    <div class="row" style="margin-top: 16px;">
+                        <button class="btn small" id="addAventuraBtn">➕ Adicionar Registro de Aventura</button>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+    <script>
+        // JS Logic will be placed here
+        const $ = (selector) => document.querySelector(selector);
+        const $$ = (selector) => document.querySelectorAll(selector);
+
+        // --- DATABASE & CORE ---
+        let characterData = {};
+        let currentId = 'default';
+        let saveTimeout = null;
+        const ATTRIBUTES_LIST = ["FOR", "AGI", "RES", "FUR", "INT", "PER", "CAR", "FRV", "CON"];
+        
+        const PONTO_PARTIDA_BONUS = {
+            arden_city: "+1 INT ou Skill: Acesso Científico Corporativo",
+            bay_city: "+1 FUR ou Skill: Contatos do Submundo",
+            drakovia: "+1 FRV ou Skill: Tática de Elite",
+            tirevia: "+1 RES ou Skill: Rastreamento Oculto",
+            vallora: "+1 FOR ou Skill: Cultura de Resistência",
+            axxion: "+1 PER ou Skill: Códigos Galácticos",
+            quantaris: "+1 AGI ou Skill: Adaptação Extrema"
+        };
+        
+        const OPINIAO_PUBLICA_NIVEIS = [
+            { pop: 0, nome: "Inimigo da Humanidade" }, { pop: 5, nome: "Procurado" },
+            { pop: 15, nome: "Ameaça Pública" }, { pop: 30, nome: "Hostil" },
+            { pop: 50, nome: "Instável" }, { pop: 70, nome: "Neutro" },
+            { pop: 90, nome: "Gratidão" }, { pop: 110, nome: "Amigável" },
+            { pop: 130, nome: "Popular" }, { pop: 160, nome: "Figura Respeitada" },
+            { pop: 190, nome: "Herói Nacional" }, { pop: 220, nome: "Ícone Global" }
+        ];
+
+        const TEAM_LEVELS = [
+            { pee: 0, nome: "1 (Improvisada)"}, { pee: 10, nome: "2 (Refúgio)"},
+            { pee: 25, nome: "3 (Base Inicial)"}, { pee: 45, nome: "4 (Núcleo Reconhecido)"},
+            { pee: 70, nome: "5 (Base Avançada)"}, { pee: 100, nome: "6 (Nome Público)"},
+            { pee: 150, nome: "7 (Força Operacional)"}, { pee: 220, nome: "8 (Reconhecida Internacionalmente)"},
+            { pee: 300, nome: "9 (Poder de Influência)"}, { pee: 400, nome: "10 (Símbolo Global)"},
+            { pee: 550, nome: "11 (Potência Global)"}, { pee: 750, nome: "12 (Lenda)"},
+        ];
+
+        const INSTITUICOES = [
+            "Governo de Westor", "Governo de Tirevia", "Governo de Drakovia", "Governo de Vallora", "Governo de Axxion", "Conselho de Quantaris",
+            "Assembleia das Nações (AN)", "Cientistas", "A Corporação", "Conselho Galáctico (CG)"
+        ];
+
+        const REGIOES = ["Arden City", "Bay City", "Drakovia", "Tirevia", "Vallora", "Axxion", "Quantaris"];
+        
+        const RELACIONAMENTO_NIVEIS = ["", "Inimigo", "Procurado", "Em Sanção", "Hostil", "Instável", "Neutro", "Gratidão", "Amigável", "Aliado", "Recruta", "Soldado", "Agente"];
+
+        const LICENCAS = ["Carro", "Moto", "Aérea Terrestre", "Nave Espacial", "Barco", "Submarino"];
+
+        function generateId() {
+            return Date.now().toString(36) + Math.random().toString(36).substring(2);
+        }
+
+        function sanitizeForId(text) {
+            return text.replace(/[^a-zA-Z0-9]/g, '_');
+        }
+        
+        // --- MODAL FUNCTIONS ---
+        function showMessageBox(message) {
+            $('#message-text').textContent = message;
+            $('#message-modal').style.display = 'flex';
+            return new Promise(resolve => {
+                $('#message-ok').onclick = () => {
+                    $('#message-modal').style.display = 'none';
+                    resolve();
+                };
+            });
+        }
+
+        // --- UI UPDATE FUNCTIONS ---
+        function updateAllUI() {
+            updateAtributosUI();
+            updateCalculatedStats();
+            updatePontoPartidaBonus();
+            updateReputacaoUI();
+            updateSigiloUI();
+            updateEspecieDependents();
+            updateEstabilidadeMental();
+            updateCorrupcaoMoral();
+            updateEquipeUI();
+        }
+
+        function updateAtributosUI() {
+            const isComTraje = $('#trajeToggle').checked;
+            const attrSource = isComTraje ? characterData[currentId].atributos.comTraje : characterData[currentId].atributos.semTraje;
+
+            for (const attr of ATTRIBUTES_LIST) {
+                const val = attrSource[attr] || 6;
+                const mod = Math.floor((val - 10) / 2);
+                $(`#val_${attr}`).textContent = val;
+                $(`#mod_${attr}`).textContent = `mod ${mod >= 0 ? '+' : ''}${mod}`;
+            }
+            updatePointsDistribution();
+            recalcAllSkills();
+        }
+
+        function updatePointsDistribution() {
+            const data = characterData[currentId];
+            if (!data) return;
+
+            const cfg_pts = parseInt($('#cfg_pts').value) || 10;
+            const cfg_bonus = parseInt($('#cfg_bonus').value) || 2;
+            const cfg_forcar_fraqueza = $('#cfg_forcar_fraqueza').value === 'true';
+
+            let spentPoints = 0;
+            let attrsAt6 = 0;
+            
+            // Only check attributes on the "Sem Traje" sheet for point distribution
+            const attrsSemTraje = data.atributos.semTraje;
+            for (const attr in attrsSemTraje) {
+                if (attrsSemTraje[attr] > 10) spentPoints += (attrsSemTraje[attr] - 10);
+                if (attrsSemTraje[attr] === 6) attrsAt6++;
+            }
+
+            const hasFraquezaSemTraje = Object.values(data.atributos.semTraje).some(v => v <= 6);
+            const hasFraquezaComTraje = Object.values(data.atributos.comTraje).some(v => v <= 6);
+
+            const bonusPoints = (attrsAt6 >= 2) ? cfg_bonus : 0;
+            const remainingPoints = cfg_pts + bonusPoints - spentPoints;
+            $('#pontosRestantes').textContent = remainingPoints;
+
+            $('#fraquezaWarning').classList.toggle('hidden', !cfg_forcar_fraqueza || (hasFraquezaSemTraje && hasFraquezaComTraje));
+        }
+        
+        function updateCalculatedStats() {
+            const data = characterData[currentId];
+            if (!data) return;
+            
+            const isComTraje = $('#trajeToggle').checked;
+            const attrs = isComTraje ? data.atributos.comTraje : data.atributos.semTraje;
+            
+            let maxHP = parseInt($('#input_hp_max').value) || 0;
+            if (maxHP === 0) {
+                const res = attrs.RES || 10;
+                let hpBonus = 0;
+                if (data.especie === 'meta-humano') hpBonus = 2;
+                if (data.especie === 'alienigena') hpBonus = 4;
+                maxHP = (res * 2) + 10 + hpBonus;
+                $('#input_hp_max').value = maxHP;
+            }
+
+            let maxPP = parseInt($('#input_pp_max').value) || 0;
+            if (maxPP === 0) {
+                const frv = attrs.FRV || 10;
+                let ppBonus = 0;
+                if (data.especie === 'humano') ppBonus = 1;
+                if (data.especie === 'meta-humano') ppBonus = 2;
+                if (data.especie === 'alienigena') ppBonus = 3;
+                maxPP = 1 + Math.floor((frv - 10) / 2) + ppBonus;
+                $('#input_pp_max').value = maxPP;
+            }
+
+            const maxBLD = parseInt($('#input_bld_max').value) || 0;
+
+            $('#max_hp_display').textContent = maxHP;
+            $('#max_pp_display').textContent = maxPP;
+            $('#max_bld_display').textContent = maxBLD;
+
+            const currentHP = Math.min(parseInt($('#input_hp_current').value) || 0, maxHP);
+            const currentPP = Math.min(parseInt($('#input_pp_current').value) || 0, maxPP);
+            const currentBLD = Math.min(parseInt($('#input_bld_current').value) || 0, maxBLD);
+
+            $('#current_hp_display').textContent = currentHP;
+            $('#bar_hp').style.width = maxHP > 0 ? `${(currentHP / maxHP) * 100}%` : '0%';
+            
+            $('#current_pp_display').textContent = currentPP;
+            $('#bar_pp').style.width = maxPP > 0 ? `${(currentPP / maxPP) * 100}%` : '0%';
+            
+            $('#current_bld_display').textContent = currentBLD;
+            $('#bar_bld').style.width = maxBLD > 0 ? `${(currentBLD / maxBLD) * 100}%` : '0%';
+        }
+
+        function updateEstabilidadeMental() {
+            const data = characterData[currentId];
+            if (!data) return;
+
+            let maxEM = parseInt($('#input_em_max').value) || 0;
+            if (maxEM === 0) {
+                const frv = data.atributos.semTraje.FRV || 10; // Base EM on "sem traje" FRV
+                maxEM = frv * 5;
+                $('#input_em_max').value = maxEM;
+            }
+
+            const currentEM = Math.min(parseInt($('#input_em_current').value) || 0, maxEM);
+            
+            $('#em_max_display').textContent = maxEM;
+            $('#em_current_display').textContent = currentEM;
+            $('#bar_em').style.width = maxEM > 0 ? `${(currentEM / maxEM) * 100}%` : '0%';
+
+            const percentage = maxEM > 0 ? (currentEM / maxEM) * 100 : 100;
+            let status = 'Estável';
+            if (percentage < 80) status = 'Abalado';
+            if (percentage < 60) status = 'Perturbado';
+            if (percentage < 40) status = 'Instável';
+            if (percentage < 20) status = 'Em Colapso';
+            if (percentage <= 0) status = 'Ruptura';
+            $('#em_status').textContent = status;
+        }
+
+        function updateCorrupcaoMoral() {
+            const slider = $('#corrupcao_slider');
+            const value = parseInt(slider.value);
+            $('#corrupcao_value').textContent = `${value}/20`;
+            
+            let efeito = "Nenhum.";
+            if (value >= 10 && value < 20) efeito = "Desvantagens sociais e mentais (-2 em Opinião Pública e Interações Sociais).";
+            if (value >= 20) efeito = "Risco de queda moral, tornando-se anti-herói ou vilão.";
+            $('#corrupcao_efeitos').textContent = `Efeitos: ${efeito}`;
+        }
+        
+        function updatePontoPartidaBonus() {
+            const ponto = $('#pontoPartida').value;
+            $('#pontoPartidaBonus').textContent = `Bônus: ${PONTO_PARTIDA_BONUS[ponto]}`;
+        }
+        
+        function updateReputacaoUI(e) {
+            const pop = e ? parseInt(e.target.value) : parseInt($('#popSlider').value);
+            $('#popValue').textContent = pop;
+            let nivel = OPINIAO_PUBLICA_NIVEIS.find(n => n.pop <= pop) || OPINIAO_PUBLICA_NIVEIS[0];
+            for (let i = OPINIAO_PUBLICA_NIVEIS.length - 1; i >= 0; i--) {
+                if (pop >= OPINIAO_PUBLICA_NIVEIS[i].pop) {
+                    nivel = OPINIAO_PUBLICA_NIVEIS[i];
+                    break;
+                }
+            }
+            $('#reputacaoNivel').textContent = nivel.nome;
+        }
+
+        function updateSigiloUI(e) {
+            const sigilo = e ? e.target.value : $('#sigiloSlider').value;
+            $('#sigiloValue').textContent = `${sigilo}`;
+            const isSecreta = $('#identidadeSecretaToggle').checked;
+            $('#sigiloContainer').classList.toggle('hidden', !isSecreta);
+        }
+
+        function updateEspecieDependents() {
+            const especie = $('#especie').value;
+            const isMeta = especie === 'meta-humano';
+            $('#origemPoderContainer').classList.toggle('hidden', !isMeta);
+            $('#attr_CON').classList.toggle('hidden', !isMeta);
+        }
+
+        function updateEquipeUI() {
+            const teamPop = parseInt($('#team_popSlider').value);
+            $('#team_popValue').textContent = teamPop;
+            let nivelReputacao = OPINIAO_PUBLICA_NIVEIS[5].nome; // Default to Neutro
+            for (let i = OPINIAO_PUBLICA_NIVEIS.length - 1; i >= 0; i--) {
+                if (teamPop >= OPINIAO_PUBLICA_NIVEIS[i].pop) {
+                    nivelReputacao = OPINIAO_PUBLICA_NIVEIS[i].nome;
+                    break;
+                }
+            }
+            $('#team_reputacaoNivel').textContent = nivelReputacao;
+        }
+
+        // --- DYNAMIC ELEMENT BUILDERS ---
+        function createAttribute(attr) {
+            const attrDiv = document.createElement('div');
+            attrDiv.classList.add('attr');
+            attrDiv.id = `attr_${attr}`;
+            attrDiv.innerHTML = `
+                <div class="label">${attr}</div>
+                <div class="val" id="val_${attr}">10</div>
+                <div class="mod" id="mod_${attr}">mod +0</div>
+                <div class="controls">
+                    <button class="btn small" data-attr="${attr}" data-dir="-1">−</button>
+                    <button class="btn small" data-attr="${attr}" data-dir="1">+</button>
+                </div>`;
+            $('#attrGrid').appendChild(attrDiv);
+            attrDiv.querySelectorAll('button').forEach(btn => btn.addEventListener('click', handleAttrChange));
+        }
+
+        function createSkillRow(skill = { id: generateId(), name: '', attr: 'FOR', trained: false, specialized: false, extra: 0 }) {
+            const tr = document.createElement('tr');
+            tr.dataset.id = skill.id;
+            tr.innerHTML = `
+                <td><input type="text" class="skill-name" value="${skill.name}"></td>
+                <td><select class="skill-attr">${ATTRIBUTES_LIST.map(a => `<option value="${a}" ${a === skill.attr ? 'selected' : ''}>${a}</option>`).join('')}</select></td>
+                <td><input type="checkbox" class="skill-trained" ${skill.trained ? 'checked' : ''}></td>
+                <td><input type="checkbox" class="skill-specialized" ${skill.specialized ? 'checked' : ''}></td>
+                <td><input type="number" class="skill-extra" value="${skill.extra || 0}"></td>
+                <td class="skill-total">0</td>
+                <td><button class="btn small destructive remove-btn">X</button></td>`;
+            $('#skillsBody').appendChild(tr);
+            tr.querySelectorAll('input, select').forEach(el => el.addEventListener('input', () => { recalcAllSkills(); autoSave(); }));
+            tr.querySelector('.remove-btn').addEventListener('click', () => { tr.remove(); autoSave(); });
+        }
+
+        function recalcAllSkills() {
+            $$('#skillsBody tr').forEach(tr => {
+                const attr = tr.querySelector('.skill-attr').value;
+                if(!attr) return;
+                const isComTraje = $('#trajeToggle').checked;
+                const attrSource = isComTraje ? characterData[currentId].atributos.comTraje : characterData[currentId].atributos.semTraje;
+                const baseMod = Math.floor(((attrSource[attr] || 10) - 10) / 2);
+                const trained = tr.querySelector('.skill-trained').checked ? 2 : 0;
+                const specialized = tr.querySelector('.skill-specialized').checked ? 4 : 0;
+                const extra = parseInt(tr.querySelector('.skill-extra').value) || 0;
+                tr.querySelector('.skill-total').textContent = baseMod + trained + specialized + extra;
+            });
+        }
+        
+        function createDynamicEntry(listId, item = { id: generateId(), name: '', desc: '' }, titlePlaceholder, descPlaceholder) {
+            const list = $(listId);
+            const entryDiv = document.createElement('div');
+            entryDiv.classList.add('entry');
+            entryDiv.dataset.id = item.id;
+            entryDiv.innerHTML = `
+                <div class="entry-header">
+                    <h4 class="entry-title">${item.name || titlePlaceholder}</h4>
+                    <button class="btn small destructive remove-btn">X</button>
+                </div>
+                <div class="entry-content">
+                    <label>Nome<input type="text" class="entry-name" placeholder="${titlePlaceholder}" value="${item.name || ''}"></label>
+                    <label>Descrição/Notas<textarea class="entry-desc" placeholder="${descPlaceholder}">${item.desc || ''}</textarea></label>
+                </div>`;
+            list.appendChild(entryDiv);
+            
+            entryDiv.querySelector('.entry-header').addEventListener('click', (e) => {
+                if (e.target.classList.contains('remove-btn')) return;
+                entryDiv.querySelector('.entry-content').classList.toggle('open');
+            });
+            entryDiv.querySelector('.remove-btn').addEventListener('click', () => { entryDiv.remove(); autoSave(); });
+            entryDiv.querySelector('.entry-name').addEventListener('input', (e) => {
+                entryDiv.querySelector('.entry-title').textContent = e.target.value || titlePlaceholder;
+                autoSave();
+            });
+            entryDiv.querySelector('.entry-desc').addEventListener('input', autoSave);
+        }
+
+        function createTeamMemberEntry(listId, item = { id: generateId(), name: '', species: 'humano', attributes: {}, notes: '' }) {
+            const list = $(listId);
+            const entryDiv = document.createElement('div');
+            entryDiv.classList.add('entry');
+            entryDiv.dataset.id = item.id;
+            
+            const defaultAttributes = { FOR: 10, AGI: 10, RES: 10, FUR: 10, INT: 10, PER: 10, CAR: 10, FRV: 10, CON: 10 };
+            const memberAttributes = { ...defaultAttributes, ...item.attributes };
+
+            let attributesHTML = '';
+            ATTRIBUTES_LIST.forEach(attr => {
+                attributesHTML += `<label>${attr}<input type="number" class="team-member-attr-input" data-attr="${attr}" value="${memberAttributes[attr]}"></label>`;
+            });
+
+            entryDiv.innerHTML = `
+                <div class="entry-header">
+                    <h4 class="entry-title">${item.name || 'Novo Membro'}</h4>
+                    <button class="btn small destructive remove-btn">X</button>
+                </div>
+                <div class="entry-content">
+                    <div class="grid cols-2">
+                        <label>Nome<input type="text" class="entry-name" placeholder="Nome do Membro" value="${item.name || ''}"></label>
+                        <label>Espécie
+                            <select class="team-member-species">
+                                <option value="humano" ${item.species === 'humano' ? 'selected' : ''}>Humano</option>
+                                <option value="meta-humano" ${item.species === 'meta-humano' ? 'selected' : ''}>Meta-Humano</option>
+                                <option value="alienigena" ${item.species === 'alienigena' ? 'selected' : ''}>Alienígena</option>
+                            </select>
+                        </label>
+                    </div>
+                    <h5 style="margin-top: 12px; margin-bottom: 8px;">Atributos</h5>
+                    <div class="grid" style="grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 8px;">
+                        ${attributesHTML}
+                    </div>
+                    <label style="margin-top: 12px;">Notas Adicionais<textarea class="entry-desc" placeholder="Poderes, habilidades, etc.">${item.notes || ''}</textarea></label>
+                </div>`;
+            list.appendChild(entryDiv);
+
+            entryDiv.querySelector('.entry-header').addEventListener('click', (e) => {
+                if (e.target.classList.contains('remove-btn')) return;
+                entryDiv.querySelector('.entry-content').classList.toggle('open');
+            });
+            entryDiv.querySelector('.remove-btn').addEventListener('click', () => { entryDiv.remove(); autoSave(); });
+            entryDiv.querySelector('.entry-name').addEventListener('input', (e) => {
+                entryDiv.querySelector('.entry-title').textContent = e.target.value || 'Novo Membro';
+                autoSave();
+            });
+            entryDiv.querySelectorAll('input, select, textarea').forEach(el => el.addEventListener('input', autoSave));
+        }
+
+        function createRelacionamentoEntry(listId, item = { id: generateId(), name: '', desc: '', sigilo: 10 }) {
+            const list = $(listId);
+            const entryDiv = document.createElement('div');
+            entryDiv.classList.add('entry');
+            entryDiv.dataset.id = item.id;
+            entryDiv.innerHTML = `
+                <div class="entry-header">
+                    <h4 class="entry-title">${item.name || 'Novo Relacionamento'}</h4>
+                    <button class="btn small destructive remove-btn">X</button>
+                </div>
+                <div class="entry-content">
+                    <label>Nome<input type="text" class="entry-name" placeholder="Nome da Pessoa" value="${item.name || ''}"></label>
+                    <label>Descrição<textarea class="entry-desc" placeholder="Descrição do relacionamento">${item.desc || ''}</textarea></label>
+                    <label>Índice de Sigilo Relacional: <b class="sigilo-relacional-value">${item.sigilo || 10}</b>/10
+                        <input type="range" class="sigilo-relacional-slider" min="0" max="10" value="${item.sigilo || 10}">
+                    </label>
+                </div>`;
+            list.appendChild(entryDiv);
+            
+            const slider = entryDiv.querySelector('.sigilo-relacional-slider');
+            const valueDisplay = entryDiv.querySelector('.sigilo-relacional-value');
+
+            slider.addEventListener('input', () => {
+                valueDisplay.textContent = slider.value;
+                autoSave();
+            });
+
+            entryDiv.querySelector('.entry-header').addEventListener('click', (e) => {
+                if (e.target.classList.contains('remove-btn')) return;
+                entryDiv.querySelector('.entry-content').classList.toggle('open');
+            });
+            entryDiv.querySelector('.remove-btn').addEventListener('click', () => { entryDiv.remove(); autoSave(); });
+            entryDiv.querySelector('.entry-name').addEventListener('input', (e) => {
+                entryDiv.querySelector('.entry-title').textContent = e.target.value || 'Novo Relacionamento';
+                autoSave();
+            });
+            entryDiv.querySelector('.entry-desc').addEventListener('input', autoSave);
+        }
+        
+        function createRivalEntry(listId, item = { id: generateId(), name: '', desc: '', atributos: '' }) {
+            const list = $(listId);
+            const entryDiv = document.createElement('div');
+            entryDiv.classList.add('entry');
+            entryDiv.dataset.id = item.id;
+            entryDiv.innerHTML = `
+                <div class="entry-header">
+                    <h4 class="entry-title">${item.name || 'Novo Rival'}</h4>
+                    <button class="btn small destructive remove-btn">X</button>
+                </div>
+                <div class="entry-content">
+                    <label>Nome<input type="text" class="entry-name" placeholder="Nome do Rival" value="${item.name || ''}"></label>
+                    <label>Motivo da Rivalidade<textarea class="entry-desc" placeholder="Descrição da rivalidade">${item.desc || ''}</textarea></label>
+                    <label>Atributos/Poderes<textarea class="rival-attrs" placeholder="Detalhes de combate, poderes, fraquezas...">${item.atributos || ''}</textarea></label>
+                </div>`;
+            list.appendChild(entryDiv);
+            
+            entryDiv.querySelector('.entry-header').addEventListener('click', (e) => {
+                if (e.target.classList.contains('remove-btn')) return;
+                entryDiv.querySelector('.entry-content').classList.toggle('open');
+            });
+            entryDiv.querySelector('.remove-btn').addEventListener('click', () => { entryDiv.remove(); autoSave(); });
+            entryDiv.querySelector('.entry-name').addEventListener('input', (e) => {
+                entryDiv.querySelector('.entry-title').textContent = e.target.value || 'Novo Rival';
+                autoSave();
+            });
+            entryDiv.querySelector('.entry-desc').addEventListener('input', autoSave);
+            entryDiv.querySelector('.rival-attrs').addEventListener('input', autoSave);
+        }
+
+        function createInventoryItem(item = { id: generateId(), name: '', slots: 1, qtd: 1 }) {
+            const list = $('#inventoryList');
+            const entryDiv = document.createElement('div');
+            entryDiv.classList.add('entry');
+            entryDiv.dataset.id = item.id;
+            entryDiv.innerHTML = `
+                <div class="grid cols-3">
+                    <input type="text" class="item-name" placeholder="Nome do item" value="${item.name || ''}">
+                    <input type="number" class="item-slots" placeholder="Slots" value="${item.slots || 1}" min="0">
+                    <input type="number" class="item-qtd" placeholder="Qtd" value="${item.qtd || 1}" min="0">
+                </div>
+                 <button class="btn small destructive remove-btn" style="margin-top: 8px;">Remover</button>
+            `;
+            list.appendChild(entryDiv);
+            entryDiv.querySelectorAll('input').forEach(el => el.addEventListener('input', () => { calculateSlots(); autoSave(); }));
+            entryDiv.querySelector('.remove-btn').addEventListener('click', () => { entryDiv.remove(); calculateSlots(); autoSave(); });
+        }
+
+        function createAventuraEntry(item = { id: generateId(), nome: '', date: '', resumo: '', contribChar: '', contribHist: '' }, isOpen = false) {
+            const list = $('#aventurasList');
+            const entryDiv = document.createElement('div');
+            entryDiv.classList.add('entry');
+            entryDiv.dataset.id = item.id;
+            const displayDate = item.date ? new Date(item.date + 'T00:00:00').toLocaleDateString('pt-BR') : 'Sem Data';
+            const displayName = item.nome ? `${item.nome} - ${displayDate}` : `Sessão de ${displayDate}`;
+
+            entryDiv.innerHTML = `
+                <div class="entry-header">
+                    <h4 class="entry-title">${displayName}</h4>
+                    <button class="btn small destructive remove-btn">X</button>
+                </div>
+                <div class="entry-content ${isOpen ? 'open' : ''}">
+                    <label>Nome da Aventura<input type="text" class="aventura-nome" value="${item.nome || ''}"></label>
+                    <label>Data da Sessão<input type="date" class="aventura-data" value="${item.date || ''}"></label>
+                    <label>Resumo da Sessão<textarea class="aventura-resumo">${item.resumo || ''}</textarea></label>
+                    <label>Contribuição do Personagem<textarea class="aventura-contrib-char">${item.contribChar || ''}</textarea></label>
+                    <label>Evolução do Personagem<textarea class="aventura-contrib-hist">${item.contribHist || ''}</textarea></label>
+                </div>
+            `;
+            list.prepend(entryDiv); // Prepend to show newest first
+
+            const nameInput = entryDiv.querySelector('.aventura-nome');
+            const dateInput = entryDiv.querySelector('.aventura-data');
+            const title = entryDiv.querySelector('.entry-title');
+
+            const updateTitle = () => {
+                const newDisplayDate = dateInput.value ? new Date(dateInput.value + 'T00:00:00').toLocaleDateString('pt-BR') : 'Sem Data';
+                title.textContent = nameInput.value ? `${nameInput.value} - ${newDisplayDate}` : `Sessão de ${newDisplayDate}`;
+                autoSave();
+            };
+
+            nameInput.addEventListener('input', updateTitle);
+            dateInput.addEventListener('input', updateTitle);
+
+            entryDiv.querySelector('.entry-header').addEventListener('click', (e) => {
+                if (e.target.classList.contains('remove-btn')) return;
+                entryDiv.querySelector('.entry-content').classList.toggle('open');
+            });
+            entryDiv.querySelector('.remove-btn').addEventListener('click', () => { entryDiv.remove(); autoSave(); });
+            entryDiv.querySelectorAll('textarea').forEach(el => el.addEventListener('input', autoSave));
+        }
+
+
+        function calculateSlots() {
+            let total = 0;
+            $$('#inventoryList .entry').forEach(entry => {
+                const slots = parseFloat(entry.querySelector('.item-slots').value) || 0;
+                const qtd = parseInt(entry.querySelector('.item-qtd').value) || 0;
+                total += slots * qtd;
+            });
+            $('#slotsCurrent').textContent = total;
+            const isComTraje = $('#trajeToggle').checked;
+            const attrs = isComTraje ? characterData[currentId].atributos.comTraje : characterData[currentId].atributos.semTraje;
+            const res = attrs.RES || 10;
+            $('#slotsMax').textContent = res * 5;
+        }
+
+        // --- EVENT HANDLERS ---
+        function handleAttrChange(e) {
+            const { attr, dir } = e.target.dataset;
+            const isComTraje = $('#trajeToggle').checked;
+            const attrKey = isComTraje ? 'comTraje' : 'semTraje';
+            let currentVal = characterData[currentId].atributos[attrKey][attr];
+            let newVal = currentVal + parseInt(dir);
+            if (newVal < 6 || newVal > 20) return; // Limites de atributo
+            characterData[currentId].atributos[attrKey][attr] = newVal;
+            
+            updateAtributosUI();
+            updateCalculatedStats();
+            calculateSlots();
+            autoSave();
+        }
+
+        // --- CHARACTER MANAGEMENT ---
+        function saveCharacter() {
+            if (!currentId) return;
+            const data = characterData[currentId];
+            
+            // Header
+            data.nomeJogador = $('#nomeJogador').value;
+            data.nomeReal = $('#nomeReal').value;
+            data.nomeHeroi = $('#nomeHeroi').value;
+            data.especie = $('#especie').value;
+            data.origemPoder = $('#origemPoder').value;
+            data.conduta = $('#conduta').value;
+            data.pontoPartida = $('#pontoPartida').value;
+            data.nivel = $('#nivel').value;
+            data.xp = $('#xp').value;
+
+            // Distribuicao Config
+            data.distribuicao = {
+                pts: $('#cfg_pts').value,
+                bonus: $('#cfg_bonus').value,
+                forcar_fraqueza: $('#cfg_forcar_fraqueza').value,
+            };
+            
+            // Recursos
+            data.recursos.hp_current = parseInt($('#input_hp_current').value);
+            data.recursos.hp_max = parseInt($('#input_hp_max').value);
+            data.recursos.pp_current = parseInt($('#input_pp_current').value);
+            data.recursos.pp_max = parseInt($('#input_pp_max').value);
+            data.recursos.bld_current = parseInt($('#input_bld_current').value);
+            data.recursos.bld_max = parseInt($('#input_bld_max').value);
+            data.recursos.em_current = parseInt($('#input_em_current').value);
+            data.recursos.em_max = parseInt($('#input_em_max').value);
+            data.recursos.corrupcao_moral = parseInt($('#corrupcao_slider').value);
+            
+            // Condições
+            data.conditions = {
+                mental: $('#mentalConditionSelect').value,
+                combat: Array.from($$('#activeCombatConditions .condition-item')).map(item => item.dataset.condition)
+            };
+            
+            // Reputação
+            data.reputacao.identidadeSecreta = $('#identidadeSecretaToggle').checked;
+            data.reputacao.sigilo = $('#sigiloSlider').value;
+            data.reputacao.pop = $('#popSlider').value;
+            
+            // Instituições
+            data.reputacao.instituicoes = {};
+            $$('#instituicoesList .institution-entry-wrapper').forEach(wrapper => {
+                const instName = wrapper.dataset.inst;
+                const level = wrapper.querySelector('select').value;
+                const note = wrapper.querySelector('textarea').value;
+                data.reputacao.instituicoes[instName] = { level, note };
+            });
+
+            // Regiões
+            data.reputacao.regioes = {};
+             $$('#regioesList .institution-entry-wrapper').forEach(wrapper => {
+                const regiaoName = wrapper.dataset.inst; // Reusing data-inst
+                const level = wrapper.querySelector('select').value;
+                const note = wrapper.querySelector('textarea').value;
+                data.reputacao.regioes[regiaoName] = { level, note };
+            });
+            
+            // Skills
+            data.skills = Array.from($$('#skillsBody tr')).map(tr => ({
+                id: tr.dataset.id,
+                name: tr.querySelector('.skill-name').value,
+                attr: tr.querySelector('.skill-attr').value,
+                trained: tr.querySelector('.skill-trained').checked,
+                specialized: tr.querySelector('.skill-specialized').checked,
+                extra: parseInt(tr.querySelector('.skill-extra').value) || 0
+            }));
+
+            // Dynamic Lists
+            data.poderes = Array.from($$('#poderesList .entry')).map(entry => ({ id: entry.dataset.id, name: entry.querySelector('.entry-name').value, desc: entry.querySelector('.entry-desc').value }));
+            data.traje.upgrades = Array.from($$('#trajeUpgradesList .entry')).map(entry => ({ id: entry.dataset.id, name: entry.querySelector('.entry-name').value, desc: entry.querySelector('.entry-desc').value }));
+            data.posses = Array.from($$('#possesList .entry')).map(entry => ({ id: entry.dataset.id, name: entry.querySelector('.entry-name').value, desc: entry.querySelector('.entry-desc').value }));
+            data.relacionamentos = Array.from($$('#relacionamentosList .entry')).map(entry => ({ id: entry.dataset.id, name: entry.querySelector('.entry-name').value, desc: entry.querySelector('.entry-desc').value, sigilo: entry.querySelector('.sigilo-relacional-slider').value }));
+            data.rivais = Array.from($$('#rivaisList .entry')).map(entry => ({ id: entry.dataset.id, name: entry.querySelector('.entry-name').value, desc: entry.querySelector('.entry-desc').value, atributos: entry.querySelector('.rival-attrs').value }));
+            data.memorias = Array.from($$('#memoriasList .entry')).map(entry => ({ id: entry.dataset.id, name: entry.querySelector('.entry-name').value, desc: entry.querySelector('.entry-desc').value }));
+            
+            // Inventário
+            data.inventario.creditos = parseInt($('#creditos').value);
+            data.inventario.items = Array.from($$('#inventoryList .entry')).map(entry => ({ id: entry.dataset.id, name: entry.querySelector('.item-name').value, slots: parseFloat(entry.querySelector('.item-slots').value) || 0, qtd: parseInt(entry.querySelector('.item-qtd').value) || 0 }));
+            
+            // Equipe
+            if (!data.equipe) data.equipe = {}; // Compatibility check
+            data.equipe.nome = $('#team_name').value;
+            data.equipe.level = $('#team_level_select').value;
+            data.equipe.creditos = parseInt($('#team_creditos').value) || 0;
+            data.equipe.pee = parseInt($('#team_pee').value) || 0;
+            data.equipe.pop = parseInt($('#team_popSlider').value) || 70;
+            
+            data.equipe.membros = Array.from($$('#equipeMembrosList .entry')).map(entry => {
+                const memberData = {
+                    id: entry.dataset.id,
+                    name: entry.querySelector('.entry-name').value,
+                    species: entry.querySelector('.team-member-species').value,
+                    notes: entry.querySelector('.entry-desc').value,
+                    attributes: {}
+                };
+                entry.querySelectorAll('.team-member-attr-input').forEach(input => {
+                    memberData.attributes[input.dataset.attr] = parseInt(input.value) || 10;
+                });
+                return memberData;
+            });
+
+            data.equipe.ajudantes = Array.from($$('#equipeAjudantesList .entry')).map(entry => ({ id: entry.dataset.id, name: entry.querySelector('.entry-name').value, desc: entry.querySelector('.entry-desc').value }));
+            data.equipe.posses = Array.from($$('#equipePossesList .entry')).map(entry => ({ id: entry.dataset.id, name: entry.querySelector('.entry-name').value, desc: entry.querySelector('.entry-desc').value }));
+            data.equipe.instituicoes = {};
+             $$('#equipeInstituicoesList .institution-entry-wrapper').forEach(wrapper => {
+                const instName = wrapper.dataset.inst;
+                const level = wrapper.querySelector('select').value;
+                const note = wrapper.querySelector('textarea').value;
+                data.equipe.instituicoes[instName] = { level, note };
+            });
+            data.equipe.regioes = {};
+             $$('#equipeRegioesList .institution-entry-wrapper').forEach(wrapper => {
+                const regiaoName = wrapper.dataset.inst;
+                const level = wrapper.querySelector('select').value;
+                const note = wrapper.querySelector('textarea').value;
+                data.equipe.regioes[regiaoName] = { level, note };
+            });
+
+            // Aventuras
+            data.aventuras = Array.from($$('#aventurasList .entry')).map(entry => ({
+                id: entry.dataset.id,
+                nome: entry.querySelector('.aventura-nome').value,
+                date: entry.querySelector('.aventura-data').value,
+                resumo: entry.querySelector('.aventura-resumo').value,
+                contribChar: entry.querySelector('.aventura-contrib-char').value,
+                contribHist: entry.querySelector('.aventura-contrib-hist').value
+            }));
+            
+            // Outros campos
+            data.traje.desc = $('#trajeDesc').value;
+            data.traje.pts = parseInt($('#trajePts').value);
+            data.traje.fraqueza = $('#trajeFraqueza').value;
+            data.historia.aparencia = $('#historia_aparencia').value;
+            data.historia.psicologico = $('#historia_psicologico').value;
+            data.historia.origem = $('#historia_origem').value;
+            data.historia.motivacoes = $('#historia_motivacoes').value;
+            data.notas = $('#notas').value;
+
+            // Licenças
+            data.licencas = {};
+            $$('#licencasList input[type="checkbox"]').forEach(chk => { data.licencas[chk.id] = chk.checked; });
+            
+            localStorage.setItem('linhaCriticaData', JSON.stringify(characterData));
+
+            const option = $(`#characterSelect option[value="${currentId}"]`);
+            if (option) { option.textContent = data.nomeHeroi || data.nomeReal || `Personagem ${currentId.substring(0,5)}`; }
+        }
+
+        function autoSave() {
+            $('#autosave-text').textContent = 'Salvando...';
+            $('#autosave-indicator').classList.remove('saved');
+            if (saveTimeout) clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(() => {
+                saveCharacter();
+                $('#autosave-text').textContent = 'Salvo ✓';
+                $('#autosave-indicator').classList.add('saved');
+            }, 1000);
+        }
+
+        function loadCharacter(id) {
+            currentId = id;
+            const data = characterData[id];
+            if (!data) {
+                console.error(`Character data for id ${id} not found.`);
+                return;
+            }
+            
+            // Header
+            $('#nomeJogador').value = data.nomeJogador || '';
+            $('#nomeReal').value = data.nomeReal;
+            $('#nomeHeroi').value = data.nomeHeroi;
+            $('#especie').value = data.especie;
+            $('#origemPoder').value = data.origemPoder;
+            $('#conduta').value = data.conduta;
+            $('#pontoPartida').value = data.pontoPartida;
+            $('#nivel').value = data.nivel;
+            $('#xp').value = data.xp;
+
+            // Distribuicao Config
+            if (data.distribuicao) {
+                $('#cfg_pts').value = data.distribuicao.pts || 10;
+                $('#cfg_bonus').value = data.distribuicao.bonus || 2;
+                $('#cfg_forcar_fraqueza').value = data.distribuicao.forcar_fraqueza || 'true';
+            }
+            
+            // Toggle
+            $('#trajeToggle').checked = data.atributos.lastStateWasTraje || false;
+            
+            // Recursos
+            if (data.recursos) {
+                $('#input_hp_current').value = data.recursos.hp_current;
+                $('#input_hp_max').value = data.recursos.hp_max;
+                $('#input_pp_current').value = data.recursos.pp_current;
+                $('#input_pp_max').value = data.recursos.pp_max;
+                $('#input_bld_current').value = data.recursos.bld_current;
+                $('#input_bld_max').value = data.recursos.bld_max;
+                $('#input_em_current').value = data.recursos.em_current;
+                $('#input_em_max').value = data.recursos.em_max;
+                $('#corrupcao_slider').value = data.recursos.corrupcao_moral;
+            }
+
+            // Condições
+            if (data.conditions) {
+                $('#mentalConditionSelect').value = data.conditions.mental || 'Normal';
+                $('#activeCombatConditions').innerHTML = '';
+                if(data.conditions.combat) {
+                    data.conditions.combat.forEach(addActiveCombatCondition);
+                }
+            }
+
+
+            // Reputação
+            if (data.reputacao) {
+                $('#identidadeSecretaToggle').checked = data.reputacao.identidadeSecreta;
+                $('#sigiloSlider').value = data.reputacao.sigilo;
+                $('#popSlider').value = data.reputacao.pop;
+            }
+            
+            // Skills
+            $('#skillsBody').innerHTML = '';
+            if(data.skills) data.skills.forEach(s => createSkillRow(s));
+            
+             // Dynamic Lists
+            $('#poderesList').innerHTML = '';
+            if(data.poderes) data.poderes.forEach(item => createDynamicEntry('#poderesList', item, 'Novo Poder', 'Descrição do poder'));
+            
+            $('#trajeUpgradesList').innerHTML = '';
+            if(data.traje && data.traje.upgrades) data.traje.upgrades.forEach(item => createDynamicEntry('#trajeUpgradesList', item, 'Nova Melhoria', 'Efeito da melhoria'));
+            
+            $('#possesList').innerHTML = '';
+            if(data.posses) data.posses.forEach(item => createDynamicEntry('#possesList', item, 'Nova Posse', 'Descrição'));
+            
+            $('#relacionamentosList').innerHTML = '';
+            if(data.relacionamentos) data.relacionamentos.forEach(item => createRelacionamentoEntry('#relacionamentosList', item));
+            
+            $('#rivaisList').innerHTML = '';
+            if(data.rivais) data.rivais.forEach(item => createRivalEntry('#rivaisList', item));
+            
+            $('#memoriasList').innerHTML = '';
+            if(data.memorias) data.memorias.forEach(item => createDynamicEntry('#memoriasList', item, 'Nova Memória', 'Descrição do evento'));
+            
+            $('#inventoryList').innerHTML = '';
+            if(data.inventario && data.inventario.items) data.inventario.items.forEach(item => createInventoryItem(item));
+            
+            // Equipe
+            if(data.equipe) {
+                $('#team_name').value = data.equipe.nome || 'Nome da Equipe';
+                $('#team_level_select').value = data.equipe.level || 1;
+                $('#team_creditos').value = data.equipe.creditos || 0;
+                $('#team_pee').value = data.equipe.pee || 0;
+                $('#team_popSlider').value = data.equipe.pop || 70;
+                $('#equipeMembrosList').innerHTML = '';
+                if(data.equipe.membros) data.equipe.membros.forEach(item => createTeamMemberEntry('#equipeMembrosList', item));
+                $('#equipeAjudantesList').innerHTML = '';
+                if(data.equipe.ajudantes) data.equipe.ajudantes.forEach(item => createDynamicEntry('#equipeAjudantesList', item, 'Novo Ajudante', 'Descrição'));
+                $('#equipePossesList').innerHTML = '';
+                if(data.equipe.posses) data.equipe.posses.forEach(item => createDynamicEntry('#equipePossesList', item, 'Nova Posse', 'Descrição'));
+            }
+            
+            // Aventuras
+            $('#aventurasList').innerHTML = '';
+            if (data.aventuras) {
+                data.aventuras.sort((a, b) => new Date(b.date) - new Date(a.date));
+                data.aventuras.forEach(item => createAventuraEntry(item));
+            }
+
+            // Inventário
+            if(data.inventario) $('#creditos').value = data.inventario.creditos;
+            
+            // Outros campos
+            if (data.traje) {
+                $('#trajeDesc').value = data.traje.desc;
+                $('#trajePts').value = data.traje.pts;
+                $('#trajeFraqueza').value = data.traje.fraqueza;
+            }
+            if (data.historia) {
+                $('#historia_aparencia').value = data.historia.aparencia;
+                $('#historia_psicologico').value = data.historia.psicologico;
+                $('#historia_origem').value = data.historia.origem;
+                $('#historia_motivacoes').value = data.historia.motivacoes;
+            }
+            $('#notas').value = data.notas;
+            
+            // Licenças
+            if(data.licencas) {
+              $$('#licencasList input').forEach(chk => { chk.checked = data.licencas[chk.id] || false; });
+            }
+
+            // Instituições Personagem
+            if (data.reputacao && data.reputacao.instituicoes) {
+                $$('#instituicoesList .institution-entry-wrapper').forEach(wrapper => {
+                    const instName = wrapper.dataset.inst;
+                    if (data.reputacao.instituicoes[instName]) {
+                        wrapper.querySelector('select').value = data.reputacao.instituicoes[instName].level;
+                        wrapper.querySelector('textarea').value = data.reputacao.instituicoes[instName].note;
+                    }
+                });
+            }
+
+            // Regiões Personagem
+            if (data.reputacao && data.reputacao.regioes) {
+                $$('#regioesList .institution-entry-wrapper').forEach(wrapper => {
+                    const regiaoName = wrapper.dataset.inst;
+                    if (data.reputacao.regioes[regiaoName]) {
+                        wrapper.querySelector('select').value = data.reputacao.regioes[regiaoName].level;
+                        wrapper.querySelector('textarea').value = data.reputacao.regioes[regiaoName].note;
+                    }
+                });
+            }
+            
+            // Instituições Equipe
+            if (data.equipe && data.equipe.instituicoes) {
+                $$('#equipeInstituicoesList .institution-entry-wrapper').forEach(wrapper => {
+                    const instName = wrapper.dataset.inst;
+                    if (data.equipe.instituicoes[instName]) {
+                        wrapper.querySelector('select').value = data.equipe.instituicoes[instName].level;
+                        wrapper.querySelector('textarea').value = data.equipe.instituicoes[instName].note;
+                    }
+                });
+            }
+
+            // Regiões Equipe
+            if (data.equipe && data.equipe.regioes) {
+                $$('#equipeRegioesList .institution-entry-wrapper').forEach(wrapper => {
+                    const regiaoName = wrapper.dataset.inst;
+                    if (data.equipe.regioes[regiaoName]) {
+                        wrapper.querySelector('select').value = data.equipe.regioes[regiaoName].level;
+                        wrapper.querySelector('textarea').value = data.equipe.regioes[regiaoName].note;
+                    }
+                });
+            }
+
+            updateAllUI();
+        }
+
+        function createNewCharacter() {
+            const newId = generateId();
+            characterData[newId] = {
+                nomeJogador: 'Jogador', nomeReal: 'Nome Civil', nomeHeroi: 'Codinome', especie: 'humano', origemPoder: 'gene', conduta: 'heroi', pontoPartida: 'arden_city', nivel: 1, xp: 0,
+                distribuicao: { pts: '10', bonus: '2', forcar_fraqueza: 'true' },
+                atributos: {
+                    semTraje: { FOR: 10, AGI: 10, RES: 10, FUR: 10, INT: 10, PER: 10, CAR: 10, FRV: 10, CON: 10 },
+                    comTraje: { FOR: 10, AGI: 10, RES: 10, FUR: 10, INT: 10, PER: 10, CAR: 10, FRV: 10, CON: 10 },
+                    lastStateWasTraje: false
+                },
+                recursos: { hp_current: 20, hp_max: 20, pp_current: 11, pp_max: 11, bld_current: 0, bld_max: 0, em_current: 50, em_max: 50, corrupcao_moral: 0 },
+                skills: [],
+                poderes: [],
+                traje: { desc: '', pts: 0, fraqueza: '', upgrades: [] },
+                inventario: { creditos: 1000, items: [] },
+                posses: [],
+                licencas: {},
+                conditions: { mental: 'Normal', combat: [] },
+                reputacao: {
+                    identidadeSecreta: true, sigilo: 20, pop: 70,
+                    instituicoes: {},
+                    regioes: {}
+                },
+                relacionamentos: [], rivais: [],
+                historia: { aparencia: '', psicologico: '', origem: '', motivacoes: '' },
+                memorias: [], notas: '',
+                equipe: { nome: 'Nome da Equipe', level: 1, creditos: 0, pop: 70, pee: 0, membros: [], ajudantes: [], posses: [], instituicoes: {}, regioes: {} },
+                aventuras: []
+            };
+            INSTITUICOES.forEach(inst => {
+                characterData[newId].reputacao.instituicoes[inst] = { level: "6", note: "" };
+                characterData[newId].equipe.instituicoes[inst] = { level: "6", note: "" };
+            });
+            REGIOES.forEach(regiao => {
+                characterData[newId].reputacao.regioes[regiao] = { level: "6", note: "" };
+                characterData[newId].equipe.regioes[regiao] = { level: "6", note: "" };
+            });
+            
+            updateCharacterList();
+            $('#characterSelect').value = newId;
+            loadCharacter(newId);
+        }
+
+        function duplicateCharacter() {
+            const newId = generateId();
+            const currentData = JSON.parse(JSON.stringify(characterData[currentId]));
+            currentData.nomeHeroi = `${currentData.nomeHeroi} (Cópia)`;
+            characterData[newId] = currentData;
+            
+            updateCharacterList();
+            $('#characterSelect').value = newId;
+            loadCharacter(newId);
+        }
+
+        function deleteCharacter() {
+            if (Object.keys(characterData).length <= 1) {
+                showMessageBox("Não é possível excluir a última ficha.");
+                return;
+            }
+            delete characterData[currentId];
+            localStorage.setItem('linhaCriticaData', JSON.stringify(characterData));
+            const newCurrentId = Object.keys(characterData)[0];
+            updateCharacterList();
+            $('#characterSelect').value = newCurrentId;
+            loadCharacter(newCurrentId);
+        }
+
+        function exportCharacter() {
+            saveCharacter(); // Make sure data is up-to-date
+            const dataStr = JSON.stringify(characterData[currentId], null, 2);
+            const blob = new Blob([dataStr], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            const charName = (characterData[currentId].nomeHeroi || 'personagem').replace(/[\s/\\?%*:|"<>]/g, '_');
+            a.download = `LinhaCritica_${charName}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function importCharacter(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                try {
+                    const importedData = JSON.parse(event.target.result);
+                    const newId = generateId();
+                    
+                    // Deep merge with default structure to ensure compatibility
+                    const defaultChar = JSON.parse(JSON.stringify(characterData[Object.keys(characterData)[0]] || createNewCharacter()));
+                    
+                    // Manual merge for nested objects to prevent issues
+                    const finalData = { ...defaultChar, ...importedData };
+                    finalData.atributos = { ...defaultChar.atributos, ...importedData.atributos };
+                    finalData.recursos = { ...defaultChar.recursos, ...importedData.recursos };
+                    finalData.reputacao = { ...defaultChar.reputacao, ...importedData.reputacao };
+                    finalData.inventario = { ...defaultChar.inventario, ...importedData.inventario };
+                    finalData.historia = { ...defaultChar.historia, ...importedData.historia };
+                    finalData.equipe = { ...defaultChar.equipe, ...importedData.equipe };
+                    finalData.traje = { ...defaultChar.traje, ...importedData.traje };
+
+
+                    characterData[newId] = finalData;
+                    updateCharacterList();
+                    $('#characterSelect').value = newId;
+                    loadCharacter(newId);
+                    showMessageBox("Ficha importada com sucesso!");
+                } catch (error) {
+                    console.error("Import error:", error);
+                    showMessageBox("Erro ao importar o arquivo. Verifique o formato.");
+                }
+            };
+            reader.readAsText(file);
+        }
+        
+        function updateCharacterList() {
+            const select = $('#characterSelect');
+            select.innerHTML = '';
+            for (const id in characterData) {
+                const option = document.createElement('option');
+                option.value = id;
+                option.textContent = characterData[id].nomeHeroi || characterData[id].nomeReal || `Personagem ${id.substring(0,5)}`;
+                select.appendChild(option);
+            }
+        }
+
+        function addActiveCombatCondition(conditionName) {
+            if(!conditionName || conditionName === 'Normal') return;
+            const list = $('#activeCombatConditions');
+            // Prevent duplicates
+            if (list.querySelector(`[data-condition="${conditionName}"]`)) return;
+
+            const item = document.createElement('div');
+            item.classList.add('condition-item');
+            item.dataset.condition = conditionName;
+            item.innerHTML = `<span>${conditionName}</span><button class="btn small destructive">X</button>`;
+            list.appendChild(item);
+            item.querySelector('button').addEventListener('click', () => {
+                item.remove();
+                autoSave();
+            });
+            autoSave();
+        }
+
+        function setupInitialUI() {
+            ATTRIBUTES_LIST.forEach(createAttribute);
+            
+            LICENCAS.forEach(lic => {
+                const div = document.createElement('div');
+                div.classList.add('license-item');
+                div.innerHTML = `<input type="checkbox" id="${sanitizeForId(lic)}"><label for="${sanitizeForId(lic)}">${lic}</label>`;
+                $('#licencasList').appendChild(div);
+            });
+            $('#licencasList').querySelectorAll('input').forEach(el => el.addEventListener('input', autoSave));
+
+            const teamLevelSelect = $('#team_level_select');
+            TEAM_LEVELS.forEach((level, index) => {
+                const option = document.createElement('option');
+                option.value = index + 1;
+                option.textContent = level.nome;
+                teamLevelSelect.appendChild(option);
+            });
+            
+            const instList = $('#instituicoesList');
+            const equipeInstList = $('#equipeInstituicoesList');
+            INSTITUICOES.forEach(inst => {
+                const instId = sanitizeForId(inst);
+                const wrapper = document.createElement('div');
+                wrapper.classList.add('institution-entry-wrapper');
+                wrapper.dataset.inst = inst;
+
+                wrapper.innerHTML = `
+                    <div class="institution-entry">
+                        <label>${inst}</label>
+                        <select data-inst="${inst}" id="instituicao_${instId}">
+                            ${RELACIONAMENTO_NIVEIS.map((n, i) => i > 0 ? `<option value="${i}" ${i === 6 ? 'selected' : ''}>${i}. ${n}</option>` : '').join('')}
+                        </select>
+                        <button class="btn small note-toggle-btn">Nota</button>
+                    </div>
+                    <div class="institution-note hidden">
+                        <textarea placeholder="Motivo para este nível de relação..."></textarea>
+                    </div>
+                `;
+                const equipeWrapper = wrapper.cloneNode(true);
+
+                instList.appendChild(wrapper);
+                equipeInstList.appendChild(equipeWrapper);
+
+                wrapper.querySelector('.note-toggle-btn').addEventListener('click', (e) => {
+                    e.target.closest('.institution-entry-wrapper').querySelector('.institution-note').classList.toggle('hidden');
+                });
+                 equipeWrapper.querySelector('.note-toggle-btn').addEventListener('click', (e) => {
+                    e.target.closest('.institution-entry-wrapper').querySelector('.institution-note').classList.toggle('hidden');
+                });
+            });
+
+            const regioesList = $('#regioesList');
+            const equipeRegioesList = $('#equipeRegioesList');
+            REGIOES.forEach(regiao => {
+                const regiaoId = sanitizeForId(regiao);
+                const wrapper = document.createElement('div');
+                wrapper.classList.add('institution-entry-wrapper');
+                wrapper.dataset.inst = regiao;
+
+                wrapper.innerHTML = `
+                    <div class="institution-entry">
+                        <label>${regiao}</label>
+                        <select data-inst="${regiao}" id="regiao_${regiaoId}">
+                            ${RELACIONAMENTO_NIVEIS.map((n, i) => i > 0 ? `<option value="${i}" ${i === 6 ? 'selected' : ''}>${i}. ${n}</option>` : '').join('')}
+                        </select>
+                        <button class="btn small note-toggle-btn">Nota</button>
+                    </div>
+                    <div class="institution-note hidden">
+                        <textarea placeholder="Motivo para este nível de relação..."></textarea>
+                    </div>
+                `;
+                const equipeWrapper = wrapper.cloneNode(true);
+                regioesList.appendChild(wrapper);
+                equipeRegioesList.appendChild(equipeWrapper);
+
+                wrapper.querySelector('.note-toggle-btn').addEventListener('click', (e) => {
+                    e.target.closest('.institution-entry-wrapper').querySelector('.institution-note').classList.toggle('hidden');
+                });
+                 equipeWrapper.querySelector('.note-toggle-btn').addEventListener('click', (e) => {
+                    e.target.closest('.institution-entry-wrapper').querySelector('.institution-note').classList.toggle('hidden');
+                });
+            });
+
+            $$('#instituicoesList select, #instituicoesList textarea, #equipeInstituicoesList select, #equipeInstituicoesList textarea, #regioesList select, #regioesList textarea, #equipeRegioesList select, #equipeRegioesList textarea').forEach(el => el.addEventListener('input', autoSave));
+        }
+
+        // --- INIT & EVENT LISTENERS ---
+        function init() {
+            // Setup UI
+            setupInitialUI();
+
+            // Load Data
+            const storedData = localStorage.getItem('linhaCriticaData');
+            if (storedData && Object.keys(JSON.parse(storedData)).length > 0) {
+                characterData = JSON.parse(storedData);
+                currentId = Object.keys(characterData)[0];
+            } else {
+                createNewCharacter(); // Creates the very first character
+            }
+
+            updateCharacterList();
+            loadCharacter(currentId);
+            
+            // Event Listeners
+            $('#trajeToggle').addEventListener('change', (e) => {
+                characterData[currentId].atributos.lastStateWasTraje = e.target.checked;
+                updateAtributosUI();
+                updateCalculatedStats();
+                calculateSlots();
+                autoSave();
+            });
+            
+            $$('.tab').forEach(tab => tab.addEventListener('click', (e) => {
+                $$('.tab.active').forEach(t => t.classList.remove('active'));
+                $$('.pane.active').forEach(p => p.classList.remove('active'));
+                e.currentTarget.classList.add('active');
+                $(`[data-pane="${e.currentTarget.dataset.open}"]`).classList.add('active');
+            }));
+            
+            // Character Management Buttons
+            $('#newCharBtn').addEventListener('click', createNewCharacter);
+            $('#dupCharBtn').addEventListener('click', duplicateCharacter);
+            $('#delCharBtn').addEventListener('click', deleteCharacter);
+            $('#exportBtn').addEventListener('click', exportCharacter);
+            $('#importFile').addEventListener('change', importCharacter);
+            $('#printBtn').addEventListener('click', () => window.print());
+            $('#characterSelect').addEventListener('change', (e) => {
+                saveCharacter();
+                loadCharacter(e.target.value)
+            });
+
+            // Theme Toggle
+            $('#themeBtn').addEventListener('click', () => {
+                const currentTheme = document.body.dataset.theme;
+                document.body.dataset.theme = currentTheme === 'dark' ? 'light' : 'dark';
+            });
+            
+            // Dynamic Add Buttons
+            $('#addPoderBtn').addEventListener('click', () => createDynamicEntry('#poderesList', undefined, 'Novo Poder', 'Descrição do poder'));
+            $('#addSkillBtn').addEventListener('click', createSkillRow);
+            $('#addTrajeUpgradeBtn').addEventListener('click', () => createDynamicEntry('#trajeUpgradesList', undefined, 'Nova Melhoria', 'Efeito da Melhoria'));
+            $('#addInventoryItemBtn').addEventListener('click', createInventoryItem);
+            $('#addPosseBtn').addEventListener('click', () => createDynamicEntry('#possesList', undefined, 'Nova Posse', 'Descrição'));
+            $('#addRelacionamentoBtn').addEventListener('click', () => createRelacionamentoEntry('#relacionamentosList'));
+            $('#addRivalBtn').addEventListener('click', () => createRivalEntry('#rivaisList'));
+            $('#addMemoriaBtn').addEventListener('click', () => createDynamicEntry('#memoriasList', undefined, 'Nova Memória', 'Descrição do evento'));
+            $('#addEquipeMemberBtn').addEventListener('click', () => createTeamMemberEntry('#equipeMembrosList'));
+            $('#addEquipeAjudanteBtn').addEventListener('click', () => createDynamicEntry('#equipeAjudantesList', undefined, 'Novo Ajudante', 'Descrição'));
+            $('#addEquipePosseBtn').addEventListener('click', () => createDynamicEntry('#equipePossesList', undefined, 'Nova Posse da Equipe', 'Descrição'));
+            $('#addAventuraBtn').addEventListener('click', () => {
+                $('#new-aventura-form').classList.remove('hidden');
+                $('#new-aventura-nome').value = '';
+                $('#new-aventura-data').value = new Date().toISOString().split('T')[0];
+                $('#new-aventura-resumo').value = '';
+                $('#new-aventura-contrib-char').value = '';
+                $('#new-aventura-contrib-hist').value = '';
+            });
+            $('#cancelNewAventuraBtn').addEventListener('click', () => $('#new-aventura-form').classList.add('hidden'));
+            $('#saveNewAventuraBtn').addEventListener('click', () => {
+                const newItem = {
+                    id: generateId(),
+                    nome: $('#new-aventura-nome').value,
+                    date: $('#new-aventura-data').value,
+                    resumo: $('#new-aventura-resumo').value,
+                    contribChar: $('#new-aventura-contrib-char').value,
+                    contribHist: $('#new-aventura-contrib-hist').value,
+                };
+                createAventuraEntry(newItem, false);
+                autoSave();
+                $('#new-aventura-form').classList.add('hidden');
+            });
+            $('#addCombatConditionBtn').addEventListener('click', () => {
+                const conditionName = $('#combatConditionSelect').value;
+                addActiveCombatCondition(conditionName);
+            });
+
+
+            // Input listeners for auto-saving and UI updates
+            $$('input, select, textarea').forEach(el => el.addEventListener('input', autoSave));
+            $('#pontoPartida').addEventListener('change', updatePontoPartidaBonus);
+            $('#especie').addEventListener('change', () => { updateEspecieDependents(); updateCalculatedStats(); autoSave(); });
+            
+            $('#popSlider').addEventListener('input', updateReputacaoUI);
+            $('#sigiloSlider').addEventListener('input', updateSigiloUI);
+            $('#identidadeSecretaToggle').addEventListener('change', updateSigiloUI);
+
+            $$('#input_hp_current, #input_hp_max, #input_pp_current, #input_pp_max, #input_bld_current, #input_bld_max').forEach(el => {
+                el.addEventListener('input', () => { updateCalculatedStats(); autoSave(); });
+            });
+            
+            $$('#input_em_current, #input_em_max').forEach(el => el.addEventListener('input', () => { updateEstabilidadeMental(); autoSave(); }));
+            $('#corrupcao_slider').addEventListener('input', () => { updateCorrupcaoMoral(); autoSave(); });
+            
+            $$('#cfg_pts, #cfg_bonus, #cfg_forcar_fraqueza').forEach(el => el.addEventListener('input', () => { updatePointsDistribution(); autoSave(); }));
+
+            $$('#team_popSlider, #team_pee, #team_level_select').forEach(el => el.addEventListener('input', () => { updateEquipeUI(); autoSave(); }));
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
