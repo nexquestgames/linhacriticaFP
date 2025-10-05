@@ -239,6 +239,44 @@
             margin: 0;
             list-style-type: square;
         }
+        
+        .gallery-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+        }
+        .gallery-item {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            width: 120px;
+            height: 120px;
+        }
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            cursor: zoom-in;
+        }
+        .delete-img-btn {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background: rgba(0,0,0,0.6);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            line-height: 1;
+        }
 
         @media (max-width: 980px) {
             .grid.cols-2, .grid.cols-3, .grid.cols-4 { grid-template-columns: 1fr; }
@@ -273,6 +311,12 @@
         <p id="message-text"></p>
         <div class="modal-buttons"><button class="btn primary" id="message-ok">OK</button></div>
       </div>
+    </div>
+
+    <div class="modal-overlay" id="image-viewer-modal" style="cursor: zoom-out;">
+        <div class="modal-content" style="background: transparent; border: none; max-width: 90vw; max-height: 90vh; padding: 0;">
+            <img id="modal-image" src="" style="width: auto; height: auto; max-width: 100%; max-height: 100%; border-radius: 16px;">
+        </div>
     </div>
   
     <!-- Header -->
@@ -664,14 +708,31 @@
                         <label style="margin-top:12px">História de Origem<textarea id="historia_origem"></textarea></label>
                         <label style="margin-top:12px">Motivações e Votos<textarea id="historia_motivacoes"></textarea></label>
                     </div>
-                    <div class="card">
-                        <h3 class="section-title">🧠 Memórias e Eventos Marcantes</h3>
-                        <div id="memoriasList"></div>
-                        <button class="btn small" id="addMemoriaBtn">➕ Adicionar Memória</button>
-                        <hr style="border-color: var(--border); margin: 16px 0;">
-                        <h3 class="section-title">📝 Notas Gerais</h3>
-                        <textarea id="notas" style="min-height: 200px;"></textarea>
+                    <div>
+                        <div class="card">
+                            <h3 class="section-title">🖼️ Galeria do Personagem</h3>
+                            <div class="row" style="margin-bottom: 12px;">
+                                <label for="imageUploadInput" class="btn small">Adicionar Imagem</label>
+                                <input type="file" id="imageUploadInput" class="hidden" accept="image/*">
+                            </div>
+                            <div id="galleryContainer" class="gallery-container">
+                                <!-- Images will be added here by JS -->
+                            </div>
+                        </div>
+                        <div class="card" style="margin-top: 16px;">
+                            <h3 class="section-title">🧠 Memórias e Eventos Marcantes</h3>
+                            <div id="memoriasList"></div>
+                            <button class="btn small" id="addMemoriaBtn">➕ Adicionar Memória</button>
+                        </div>
                     </div>
+                </div>
+                <div class="card" style="margin-top: 16px;">
+                    <h3 class="section-title">📝 Notas Gerais</h3>
+                    <textarea id="notas" style="min-height: 150px;"></textarea>
+                </div>
+                <div class="card" style="margin-top: 16px;">
+                     <h3 class="section-title">📍 Regiões de Referência</h3>
+                     <div id="regioes-reference-list" class="grid cols-2"></div>
                 </div>
             </section>
             
@@ -806,6 +867,23 @@
         const RELACIONAMENTO_NIVEIS = ["", "Inimigo", "Procurado", "Em Sanção", "Hostil", "Instável", "Neutro", "Gratidão", "Amigável", "Aliado", "Recruta", "Soldado", "Agente"];
 
         const LICENCAS = ["Carro", "Moto", "Aérea Terrestre", "Nave Espacial", "Barco", "Submarino"];
+
+        const REGIOES_LORE = [
+            { 
+                nome: "Westor", 
+                desc: "O epicentro dos eventos recentes na Terra. Um país moderno e influente, mas cheio de tensões internas e ameaças crescentes.",
+                subRegioes: [
+                    { nome: "Arden City", desc: "A Cidade do Amanhã. Moderna, centro de tecnologia e ciência. Berço da Contaminação e do Grid. Cheia de cientistas, empresários de elite. Perigos: Grid, experimentos nocivos, ameaças alienígenas e meta-humanas." },
+                    { nome: "Bay City", desc: "A Cidade do Crime. Metrópole escura onde a máfia e a corrupção dominam as ruas. Guerras de gangues são constantes. Perigos: Corrupção sistêmica, gangues violentas e criminosos (muitas vezes meta-humanos)." },
+                ]
+            },
+            { nome: "Tirevia", desc: "O Reino. Pequeno, ausente e indiferente ao resto do mundo. Focado em proteger seu lar com segurança rigorosa. Ninguém entra sem autorização. Perigos: Ameaças externas, intriga diplomática, segredos ocultos." },
+            { nome: "Drakovia", desc: "O País Coberto pela Neve. Inimigo histórico de Westor. Governo hostil e opressor. Focado em operações secretas e espionagem. Perigos: Conspirações de guerra, opressão do governo." },
+            { nome: "Vallora", desc: "A Colônia Recente. Ex-colônia de Westor, hoje sobrevive da agricultura e exportação de minérios preciosos. Alvo de exploração por nações maiores. Perigos: Ameaças externas, exploração por corporações." },
+            { nome: "Axxion", desc: "A Metrópole Intergaláctica. Planeta anão formado por destroços, é o centro de comércio e poder cósmico. Governo expansionista que busca colônias à força. Perigos: Guerra entre planetas, rebeliões de colônias." },
+            { nome: "Quantaris", desc: "O Planeta em Colapso. À beira do colapso total, com tempo e clima instáveis, alternando entre temperaturas extremas. Habitado por poucos sobreviventes. Perigos: Catástrofes climáticas, pragas, colapso total." },
+        ];
+
 
         function generateId() {
             return Date.now().toString(36) + Math.random().toString(36).substring(2);
@@ -1442,6 +1520,7 @@
             data.historia.psicologico = $('#historia_psicologico').value;
             data.historia.origem = $('#historia_origem').value;
             data.historia.motivacoes = $('#historia_motivacoes').value;
+            data.historia.galeria = Array.from($$('#galleryContainer .gallery-item img')).map(img => img.src);
             data.notas = $('#notas').value;
 
             // Licenças
@@ -1586,6 +1665,10 @@
                 $('#historia_psicologico').value = data.historia.psicologico;
                 $('#historia_origem').value = data.historia.origem;
                 $('#historia_motivacoes').value = data.historia.motivacoes;
+                $('#galleryContainer').innerHTML = '';
+                if (data.historia.galeria && Array.isArray(data.historia.galeria)) {
+                    data.historia.galeria.forEach(url => addImageToGallery(url));
+                }
             }
             $('#notas').value = data.notas;
             
@@ -1665,7 +1748,7 @@
                     regioes: {}
                 },
                 relacionamentos: [], rivais: [],
-                historia: { aparencia: '', psicologico: '', origem: '', motivacoes: '' },
+                historia: { aparencia: '', psicologico: '', origem: '', motivacoes: '', galeria: [] },
                 memorias: [], notas: '',
                 equipe: { nome: 'Nome da Equipe', level: 1, creditos: 0, pop: 70, pee: 0, membros: [], ajudantes: [], posses: [], instituicoes: {}, regioes: {} },
                 aventuras: []
@@ -1785,6 +1868,56 @@
             });
             autoSave();
         }
+        
+        function addImageToGallery(url) {
+            const galleryContainer = $('#galleryContainer');
+            const item = document.createElement('div');
+            item.className = 'gallery-item';
+            
+            const img = document.createElement('img');
+            img.src = url;
+            img.alt = 'Imagem do personagem';
+            img.onerror = function() { this.src = 'https://placehold.co/150x150/161B22/E6EDF3?text=Erro'; };
+            img.addEventListener('click', () => {
+                $('#modal-image').src = url;
+                $('#image-viewer-modal').style.display = 'flex';
+            });
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'delete-img-btn btn small destructive';
+            deleteBtn.innerHTML = '&times;';
+            deleteBtn.onclick = (e) => {
+                e.stopPropagation();
+                item.remove();
+                autoSave();
+            };
+
+            item.appendChild(img);
+            item.appendChild(deleteBtn);
+            galleryContainer.appendChild(item);
+        }
+
+        function populateRegioesLore() {
+            const container = $('#regioes-reference-list');
+            container.innerHTML = '';
+            REGIOES_LORE.forEach(regiao => {
+                const details = document.createElement('details');
+                let subRegioesHTML = '';
+                if (regiao.subRegioes) {
+                    subRegioesHTML = '<ul style="margin-left: 20px; margin-top: 8px; font-size: 0.9em;">';
+                    regiao.subRegioes.forEach(sub => {
+                        subRegioesHTML += `<li><b>${sub.nome}:</b> ${sub.desc}</li>`;
+                    });
+                    subRegioesHTML += '</ul>';
+                }
+                details.innerHTML = `
+                    <summary><b>${regiao.nome}</b></summary>
+                    <p class="muted" style="margin-top: 8px;">${regiao.desc}</p>
+                    ${subRegioesHTML}
+                `;
+                container.appendChild(details);
+            });
+        }
 
         function setupInitialUI() {
             ATTRIBUTES_LIST.forEach(createAttribute);
@@ -1871,6 +2004,8 @@
             });
 
             $$('#instituicoesList select, #instituicoesList textarea, #equipeInstituicoesList select, #equipeInstituicoesList textarea, #regioesList select, #regioesList textarea, #equipeRegioesList select, #equipeRegioesList textarea').forEach(el => el.addEventListener('input', autoSave));
+        
+            populateRegioesLore();
         }
 
         // --- INIT & EVENT LISTENERS ---
@@ -1961,6 +2096,22 @@
             $('#addCombatConditionBtn').addEventListener('click', () => {
                 const conditionName = $('#combatConditionSelect').value;
                 addActiveCombatCondition(conditionName);
+            });
+            $('#imageUploadInput').addEventListener('change', (event) => {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        addImageToGallery(e.target.result);
+                        autoSave();
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            const modalImageViewer = $('#image-viewer-modal');
+            modalImageViewer.addEventListener('click', () => {
+                modalImageViewer.style.display = 'none';
             });
 
 
