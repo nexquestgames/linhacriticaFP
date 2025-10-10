@@ -1166,7 +1166,7 @@
         function recalcAllSkills() {
             $$('#skillsBody tr').forEach(tr => {
                 const attr = tr.querySelector('.skill-attr').value;
-                if(!attr) return;
+                if(!attr || !characterData[currentId]) return;
                 const isComTraje = $('#trajeToggle').checked;
                 const attrSource = isComTraje ? characterData[currentId].atributos.comTraje : characterData[currentId].atributos.semTraje;
                 const baseMod = Math.floor(((attrSource[attr] || 10) - 10) / 2);
@@ -1854,19 +1854,21 @@
                     const importedData = JSON.parse(event.target.result);
                     const newId = generateId();
                     
-                    // Deep merge with default structure to ensure compatibility
-                    const defaultChar = JSON.parse(JSON.stringify(characterData[Object.keys(characterData)[0]] || createNewCharacter()));
-                    
-                    // Manual merge for nested objects to prevent issues
+                    const defaultChar = characterData[Object.keys(characterData)[0]] || createNewCharacter(); // Create a default structure to merge into
+
+                    // Manual deep merge
                     const finalData = { ...defaultChar, ...importedData };
-                    finalData.atributos = { ...defaultChar.atributos, ...importedData.atributos };
+                    finalData.atributos = {
+                        semTraje: { ...defaultChar.atributos.semTraje, ...(importedData.atributos ? importedData.atributos.semTraje : {}) },
+                        comTraje: { ...defaultChar.atributos.comTraje, ...(importedData.atributos ? importedData.atributos.comTraje : {}) },
+                        lastStateWasTraje: (importedData.atributos ? importedData.atributos.lastStateWasTraje : false) || false
+                    };
                     finalData.recursos = { ...defaultChar.recursos, ...importedData.recursos };
                     finalData.reputacao = { ...defaultChar.reputacao, ...importedData.reputacao };
                     finalData.inventario = { ...defaultChar.inventario, ...importedData.inventario };
                     finalData.historia = { ...defaultChar.historia, ...importedData.historia };
                     finalData.equipe = { ...defaultChar.equipe, ...importedData.equipe };
                     finalData.traje = { ...defaultChar.traje, ...importedData.traje };
-
 
                     characterData[newId] = finalData;
                     updateCharacterList();
@@ -2102,7 +2104,10 @@
             
             // Dynamic Add Buttons
             $('#addPoderBtn').addEventListener('click', () => createDynamicEntry('#poderesList', undefined, 'Novo Poder', 'Descrição do poder'));
-            $('#addSkillBtn').addEventListener('click', createSkillRow);
+            $('#addSkillBtn').addEventListener('click', () => {
+                createSkillRow();
+                recalcAllSkills();
+            });
             $('#addTrajeUpgradeBtn').addEventListener('click', () => createDynamicEntry('#trajeUpgradesList', undefined, 'Nova Melhoria', 'Efeito da Melhoria'));
             $('#addInventoryItemBtn').addEventListener('click', createInventoryItem);
             $('#addPosseBtn').addEventListener('click', () => createDynamicEntry('#possesList', undefined, 'Nova Posse', 'Descrição'));
