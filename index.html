@@ -625,6 +625,12 @@
                             <div class="grow"></div>
                             <span>Ocupados: <b id="slotsCurrent">0</b> slots</span>
                         </div>
+                        <div class="grid muted" style="padding: 0 8px; font-size: 0.9rem; font-weight: 700; grid-template-columns: 2fr 1fr 1fr auto; align-items: center; margin-bottom: 8px;">
+                            <span>Nome do Item</span>
+                            <span style="text-align: center;">Slots</span>
+                            <span style="text-align: center;">Qtd.</span>
+                            <span></span>
+                        </div>
                         <div id="inventoryList"></div>
                         <button class="btn small" id="addInventoryItemBtn">➕ Adicionar Item</button>
                         <hr style="border-color: var(--border); margin: 16px 0;">
@@ -1161,20 +1167,23 @@
             $('#skillsBody').appendChild(tr);
             tr.querySelectorAll('input, select').forEach(el => el.addEventListener('input', () => { recalcAllSkills(); autoSave(); }));
             tr.querySelector('.remove-btn').addEventListener('click', () => { tr.remove(); autoSave(); });
+            recalcSingleSkill(tr); // Calculate total on creation
+        }
+
+        function recalcSingleSkill(row) {
+            const attr = row.querySelector('.skill-attr').value;
+            if(!attr || !characterData[currentId]) return;
+            const isComTraje = $('#trajeToggle').checked;
+            const attrSource = isComTraje ? characterData[currentId].atributos.comTraje : characterData[currentId].atributos.semTraje;
+            const baseMod = Math.floor(((attrSource[attr] || 10) - 10) / 2);
+            const trained = row.querySelector('.skill-trained').checked ? 2 : 0;
+            const specialized = row.querySelector('.skill-specialized').checked ? 4 : 0;
+            const extra = parseInt(row.querySelector('.skill-extra').value) || 0;
+            row.querySelector('.skill-total').textContent = baseMod + trained + specialized + extra;
         }
 
         function recalcAllSkills() {
-            $$('#skillsBody tr').forEach(tr => {
-                const attr = tr.querySelector('.skill-attr').value;
-                if(!attr || !characterData[currentId]) return;
-                const isComTraje = $('#trajeToggle').checked;
-                const attrSource = isComTraje ? characterData[currentId].atributos.comTraje : characterData[currentId].atributos.semTraje;
-                const baseMod = Math.floor(((attrSource[attr] || 10) - 10) / 2);
-                const trained = tr.querySelector('.skill-trained').checked ? 2 : 0;
-                const specialized = tr.querySelector('.skill-specialized').checked ? 4 : 0;
-                const extra = parseInt(tr.querySelector('.skill-extra').value) || 0;
-                tr.querySelector('.skill-total').textContent = baseMod + trained + specialized + extra;
-            });
+            $$('#skillsBody tr').forEach(recalcSingleSkill);
         }
         
         function createDynamicEntry(listId, item = { id: generateId(), name: '', desc: '' }, titlePlaceholder, descPlaceholder) {
@@ -1328,14 +1337,16 @@
             const list = $('#inventoryList');
             const entryDiv = document.createElement('div');
             entryDiv.classList.add('entry');
+            entryDiv.style.padding = '8px';
+            entryDiv.style.marginBottom = '8px';
             entryDiv.dataset.id = item.id;
             entryDiv.innerHTML = `
-                <div class="grid cols-3">
-                    <input type="text" class="item-name" placeholder="Nome do item" value="${item.name || ''}">
-                    <input type="number" class="item-slots" placeholder="Slots" value="${item.slots || 1}" min="0">
-                    <input type="number" class="item-qtd" placeholder="Qtd" value="${item.qtd || 1}" min="0">
+                <div class="grid" style="grid-template-columns: 2fr 1fr 1fr auto; align-items: center; gap: 8px;">
+                    <input type="text" class="item-name" value="${item.name || ''}">
+                    <input type="number" class="item-slots" value="${item.slots || 1}" min="0" style="text-align: center;">
+                    <input type="number" class="item-qtd" value="${item.qtd || 1}" min="0" style="text-align: center;">
+                    <button class="btn small destructive remove-btn">X</button>
                 </div>
-                 <button class="btn small destructive remove-btn" style="margin-top: 8px;">Remover</button>
             `;
             list.appendChild(entryDiv);
             entryDiv.querySelectorAll('input').forEach(el => el.addEventListener('input', () => { calculateSlots(); autoSave(); }));
@@ -1592,6 +1603,15 @@
                 return;
             }
             
+            // --- MIGRATION/COMPATIBILITY ---
+            const defaultAttrs = { FOR: 10, AGI: 10, RES: 10, FUR: 10, INT: 10, PER: 10, CAR: 10, FRV: 10, CON: 10 };
+            if (!data.atributos) {
+                data.atributos = { semTraje: {}, comTraje: {} };
+            }
+            data.atributos.semTraje = { ...defaultAttrs, ...data.atributos.semTraje };
+            data.atributos.comTraje = { ...defaultAttrs, ...data.atributos.comTraje };
+            // --- END MIGRATION ---
+
             // Header
             $('#nomeJogador').value = data.nomeJogador || '';
             $('#nomeReal').value = data.nomeReal;
@@ -2104,10 +2124,7 @@
             
             // Dynamic Add Buttons
             $('#addPoderBtn').addEventListener('click', () => createDynamicEntry('#poderesList', undefined, 'Novo Poder', 'Descrição do poder'));
-            $('#addSkillBtn').addEventListener('click', () => {
-                createSkillRow();
-                recalcAllSkills();
-            });
+            $('#addSkillBtn').addEventListener('click', createSkillRow);
             $('#addTrajeUpgradeBtn').addEventListener('click', () => createDynamicEntry('#trajeUpgradesList', undefined, 'Nova Melhoria', 'Efeito da Melhoria'));
             $('#addInventoryItemBtn').addEventListener('click', createInventoryItem);
             $('#addPosseBtn').addEventListener('click', () => createDynamicEntry('#possesList', undefined, 'Nova Posse', 'Descrição'));
