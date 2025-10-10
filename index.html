@@ -1171,15 +1171,10 @@
         }
 
         function recalcSingleSkill(row) {
-            const attr = row.querySelector('.skill-attr').value;
-            if(!attr || !characterData[currentId]) return;
-            const isComTraje = $('#trajeToggle').checked;
-            const attrSource = isComTraje ? characterData[currentId].atributos.comTraje : characterData[currentId].atributos.semTraje;
-            const baseMod = Math.floor(((attrSource[attr] || 10) - 10) / 2);
             const trained = row.querySelector('.skill-trained').checked ? 2 : 0;
             const specialized = row.querySelector('.skill-specialized').checked ? 4 : 0;
             const extra = parseInt(row.querySelector('.skill-extra').value) || 0;
-            row.querySelector('.skill-total').textContent = baseMod + trained + specialized + extra;
+            row.querySelector('.skill-total').textContent = trained + specialized + extra;
         }
 
         function recalcAllSkills() {
@@ -1673,7 +1668,7 @@
             if(data.poderes) data.poderes.forEach(item => createDynamicEntry('#poderesList', item, 'Novo Poder', 'Descrição do poder'));
             
             $('#trajeUpgradesList').innerHTML = '';
-            if(data.traje && data.traje.upgrades) data.traje.upgrades.forEach(item => createDynamicEntry('#trajeUpgradesList', item, 'Nova Melhoria', 'Efeito da melhoria'));
+            if(data.traje && data.traje.upgrades) data.traje.upgrades.forEach(item => createDynamicEntry('#trajeUpgradesList', item, 'Nova Melhoria', 'Efeito da Melhoria'));
             
             $('#possesList').innerHTML = '';
             if(data.posses) data.posses.forEach(item => createDynamicEntry('#possesList', item, 'Nova Posse', 'Descrição'));
