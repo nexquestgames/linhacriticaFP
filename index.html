@@ -420,15 +420,24 @@
                     </div>
                     <div class="card">
                         <h3 class="section-title">⚙️ Distribuição</h3>
-                        <div class="row">
-                            <div>Pontos restantes:</div>
-                            <div style="font-size: 1.5rem; font-weight: 700;"><span id="pontosRestantes" style="color: var(--accent-cyan);">10</span></div>
+                        <div id="distribuicaoSemTraje">
+                            <div class="row">
+                                <div>Pontos (Sem Traje):</div>
+                                <div style="font-size: 1.5rem; font-weight: 700;"><span id="pontosRestantesSemTraje" style="color: var(--accent-cyan);">10</span></div>
+                            </div>
                         </div>
-                        <div id="fraquezaWarning" class="hidden" style="color: var(--warn); margin-top: 10px;">Atenção: A regra de fraqueza está ativa (pelo menos 1 atributo ≤ 6).</div>
+                        <div id="distribuicaoComTraje" class="hidden">
+                            <div class="row">
+                                <div>Pontos (Com Traje):</div>
+                                <div style="font-size: 1.5rem; font-weight: 700;"><span id="pontosRestantesComTraje" style="color: var(--accent-cyan);">15</span></div>
+                            </div>
+                        </div>
+                        <div id="fraquezaWarning" class="hidden" style="color: var(--warn); margin-top: 10px;">Atenção: A regra de fraqueza está ativa (pelo menos 1 atributo ≤ 6 em cada conjunto).</div>
                         <details style="margin-top: 12px;">
                             <summary>Configurar Regras</summary>
                             <div class="grid cols-2" style="margin-top: 8px;">
-                                <div><label>Pontos Iniciais<input type="number" id="cfg_pts" value="10"></label></div>
+                                <div><label>Pts. Iniciais (Sem Traje)<input type="number" id="cfg_pts_sem_traje" value="10"></label></div>
+                                <div><label>Pts. Iniciais (Com Traje)<input type="number" id="cfg_pts_com_traje" value="15"></label></div>
                                 <div><label>Bônus (2 Atributos = 6)<input type="number" id="cfg_bonus" value="2"></label></div>
                                 <div>
                                     <label>Forçar Fraqueza?</label>
@@ -947,27 +956,44 @@
             const data = characterData[currentId];
             if (!data) return;
 
-            const cfg_pts = parseInt($('#cfg_pts').value) || 10;
+            // Toggle visibility based on traje mode
+            const isComTraje = $('#trajeToggle').checked;
+            $('#distribuicaoSemTraje').classList.toggle('hidden', isComTraje);
+            $('#distribuicaoComTraje').classList.toggle('hidden', !isComTraje);
+
             const cfg_bonus = parseInt($('#cfg_bonus').value) || 2;
             const cfg_forcar_fraqueza = $('#cfg_forcar_fraqueza').value === 'true';
-
-            let spentPoints = 0;
-            let attrsAt6 = 0;
             
-            // Only check attributes on the "Sem Traje" sheet for point distribution
+            // Calculate for SEM Traje
+            const cfg_pts_sem_traje = parseInt($('#cfg_pts_sem_traje').value) || 10;
+            let spentPointsSemTraje = 0;
+            let attrsAt6SemTraje = 0;
             const attrsSemTraje = data.atributos.semTraje;
             for (const attr in attrsSemTraje) {
-                if (attrsSemTraje[attr] > 10) spentPoints += (attrsSemTraje[attr] - 10);
-                if (attrsSemTraje[attr] === 6) attrsAt6++;
+                if (attrsSemTraje[attr] > 10) spentPointsSemTraje += (attrsSemTraje[attr] - 10);
+                if (attrsSemTraje[attr] === 6) attrsAt6SemTraje++;
             }
+            const bonusPointsSemTraje = (attrsAt6SemTraje >= 2) ? cfg_bonus : 0;
+            const remainingPointsSemTraje = cfg_pts_sem_traje + bonusPointsSemTraje - spentPointsSemTraje;
+            $('#pontosRestantesSemTraje').textContent = remainingPointsSemTraje;
 
+            // Calculate for COM Traje
+            const cfg_pts_com_traje = parseInt($('#cfg_pts_com_traje').value) || 15;
+            let spentPointsComTraje = 0;
+            let attrsAt6ComTraje = 0;
+            const attrsComTraje = data.atributos.comTraje;
+            for (const attr in attrsComTraje) {
+                if (attrsComTraje[attr] > 10) spentPointsComTraje += (attrsComTraje[attr] - 10);
+                if (attrsComTraje[attr] === 6) attrsAt6ComTraje++;
+            }
+            const bonusPointsComTraje = (attrsAt6ComTraje >= 2) ? cfg_bonus : 0;
+            const remainingPointsComTraje = cfg_pts_com_traje + bonusPointsComTraje - spentPointsComTraje;
+            $('#pontosRestantesComTraje').textContent = remainingPointsComTraje;
+
+
+            // Update Fraqueza Warning
             const hasFraquezaSemTraje = Object.values(data.atributos.semTraje).some(v => v <= 6);
             const hasFraquezaComTraje = Object.values(data.atributos.comTraje).some(v => v <= 6);
-
-            const bonusPoints = (attrsAt6 >= 2) ? cfg_bonus : 0;
-            const remainingPoints = cfg_pts + bonusPoints - spentPoints;
-            $('#pontosRestantes').textContent = remainingPoints;
-
             $('#fraquezaWarning').classList.toggle('hidden', !cfg_forcar_fraqueza || (hasFraquezaSemTraje && hasFraquezaComTraje));
         }
         
@@ -1409,7 +1435,8 @@
 
             // Distribuicao Config
             data.distribuicao = {
-                pts: $('#cfg_pts').value,
+                pts_sem_traje: $('#cfg_pts_sem_traje').value,
+                pts_com_traje: $('#cfg_pts_com_traje').value,
                 bonus: $('#cfg_bonus').value,
                 forcar_fraqueza: $('#cfg_forcar_fraqueza').value,
             };
@@ -1578,7 +1605,8 @@
 
             // Distribuicao Config
             if (data.distribuicao) {
-                $('#cfg_pts').value = data.distribuicao.pts || 10;
+                $('#cfg_pts_sem_traje').value = data.distribuicao.pts_sem_traje || 10;
+                $('#cfg_pts_com_traje').value = data.distribuicao.pts_com_traje || 15;
                 $('#cfg_bonus').value = data.distribuicao.bonus || 2;
                 $('#cfg_forcar_fraqueza').value = data.distribuicao.forcar_fraqueza || 'true';
             }
@@ -1741,7 +1769,7 @@
             const newId = generateId();
             characterData[newId] = {
                 nomeJogador: 'Jogador', nomeReal: 'Nome Civil', nomeHeroi: 'Codinome', especie: 'humano', origemPoder: 'gene', conduta: 'heroi', pontoPartida: 'arden_city', nivel: 1, xp: 0,
-                distribuicao: { pts: '10', bonus: '2', forcar_fraqueza: 'true' },
+                distribuicao: { pts_sem_traje: '10',  pts_com_traje: '15', bonus: '2', forcar_fraqueza: 'true' },
                 atributos: {
                     semTraje: { FOR: 10, AGI: 10, RES: 10, FUR: 10, INT: 10, PER: 10, CAR: 10, FRV: 10, CON: 10 },
                     comTraje: { FOR: 10, AGI: 10, RES: 10, FUR: 10, INT: 10, PER: 10, CAR: 10, FRV: 10, CON: 10 },
@@ -2144,7 +2172,7 @@
             $$('#input_em_current, #input_em_max').forEach(el => el.addEventListener('input', () => { updateEstabilidadeMental(); autoSave(); }));
             $('#corrupcao_slider').addEventListener('input', () => { updateCorrupcaoMoral(); autoSave(); });
             
-            $$('#cfg_pts, #cfg_bonus, #cfg_forcar_fraqueza').forEach(el => el.addEventListener('input', () => { updatePointsDistribution(); autoSave(); }));
+            $$('#cfg_pts_sem_traje, #cfg_pts_com_traje, #cfg_bonus, #cfg_forcar_fraqueza').forEach(el => el.addEventListener('input', () => { updatePointsDistribution(); autoSave(); }));
 
             $$('#team_popSlider, #team_pee, #team_level_select').forEach(el => el.addEventListener('input', () => { updateEquipeUI(); autoSave(); }));
         }
